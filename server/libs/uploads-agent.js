@@ -59,6 +59,7 @@ module.exports = {
     self._watcher.on('add', (p) => {
       let pInfo = self.parseUploadsRelPath(p)
       return self.processFile(pInfo.folder, pInfo.filename).then((mData) => {
+		delete mData._id;
         return db.UplFile.findByIdAndUpdate(mData._id, mData, { upsert: true })
       }).then(() => {
         return git.commitUploads(lang.t('git:uploaded', { path: p }))
@@ -206,6 +207,8 @@ module.exports = {
                 return self.generateThumbnail(fPath, cacheThumbnailPathStr)
               }).return(mData)
             })
+
+//	    return mData
           })
         }
       }

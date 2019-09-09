@@ -221,12 +221,13 @@ module.exports = {
    * @return     {Promise}  Promise of the operation
    */
   moveUploadsFile (uid, fld, nFilename) {
-    let self = this
+    let self = this;
 
     return db.UplFolder.findById('f:' + fld).then((folder) => {
       if (folder) {
         return db.UplFile.findById(uid).then((originFile) => {
           // -> Check if rename is valid
+	  
 
           let nameCheck = null
           if (nFilename) {

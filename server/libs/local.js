@@ -69,7 +69,7 @@ module.exports = {
 
         cb(null, true)
       }
-    }).array('imgfile', 20)
+    }).array('imgfile', 1)
 
     // -> FILES
 

@@ -37,7 +37,10 @@ router.get('/t/*', (req, res, next) => {
   })
 })
 
-router.post('/img', lcdata.uploadImgHandler, (req, res, next) => {
+router.post('/img', lcdata.uploadImgHandler, (req, res, next) => {	  
+	
+	console.log("Files: "+JSON.stringify(req.files));
+	
   let destFolder = _.chain(req.body.folder).trim().toLower().value()
 
   upl.validateUploadsFolder(destFolder).then((destFolderPath) => {

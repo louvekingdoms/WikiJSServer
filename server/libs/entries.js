@@ -260,7 +260,6 @@ module.exports = {
       return db.Entry.findOneAndUpdate({
         _id: content.entryPath
       }, {
-        _id: content.entryPath,
         title: content.meta.title || content.entryPath,
         subtitle: content.meta.subtitle || '',
         parentTitle: content.parent.title || '',
