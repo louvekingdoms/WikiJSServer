@@ -39,7 +39,7 @@ router.get('/t/*', (req, res, next) => {
 
 router.post('/img', lcdata.uploadImgHandler, (req, res, next) => {	  
 	
-	console.log("Files: "+JSON.stringify(req.files));
+	console.log("Receiving file: "+(req.files[0].originalname));
 	
   let destFolder = _.chain(req.body.folder).trim().toLower().value()
 
