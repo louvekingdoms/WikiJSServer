@@ -48,6 +48,7 @@ module.exports = {
       parseTree: false,
       includeMarkdown: false,
       includeParentInfo: false,
+      includeChildrenInfo: false,
       cache: false
     }).then(() => {
       return true
@@ -109,6 +110,7 @@ module.exports = {
       parseTree: true,
       includeMarkdown: false,
       includeParentInfo: true,
+      includeChildrenInfo: true,
       cache: true
     })
 
@@ -140,21 +142,35 @@ module.exports = {
             }).catch((err) => { // eslint-disable-line handle-callback-err
               return (pageData.parent = false)
             }) : Promise.resolve(true)
+            
+            
+            // Get children
 
+/*
+            let childrenPromise = (options.includeChildrenInfo) ? self.getChildrenInfo(entryPath).then((children) => {
+              if (children.length > 0)
+                return (pageData.children = children)
+              return (pageData.children = false)
+            }).catch((err) => { // eslint-disable-line handle-callback-err
+              return (pageData.children = false)
+            }) : Promise.resolve(true)
+*/
             return parentPromise.then(() => {
-              // Cache to disk
+                //childrenPromise.then(() => {
+                  // Cache to disk
 
-              if (options.cache) {
-                let cacheData = JSON.stringify(_.pick(pageData, ['html', 'meta', 'tree', 'parent']), false, false, false)
-                return fs.writeFileAsync(cpath, cacheData).catch((err) => {
-                  winston.error('Unable to write to cache! Performance may be affected.')
-                  winston.error(err)
-                  return true
-                })
-              } else {
-                return true
-              }
-            }).return(pageData)
+                  if (options.cache) {
+                    let cacheData = JSON.stringify(_.pick(pageData, ['html', 'meta', 'tree', 'parent', 'children']), false, false, false)
+                    return fs.writeFileAsync(cpath, cacheData).catch((err) => {
+                      winston.error('Unable to write to cache! Performance may be affected.')
+                      winston.error(err)
+                      return true
+                    })
+                  } else {
+                    return true
+                  }
+                //})
+            }).return(pageData);
           })
         })
       } else {
@@ -196,6 +212,46 @@ module.exports = {
     } else {
       return Promise.reject(new Error(lang.t('errors:parentisroot')))
     }
+  },
+
+  /**
+   * Gets the children information.
+   *
+   * @param      {String}                 entryPath  The entry path
+   * @return     {Promise<Object|False>}  The children information.
+   */
+  getChildrenInfo(entryPath) {
+    
+    db.Entry.find({ parentPath: entryPath }).sort({ title: 'asc' }).then(contents => {
+    
+        let children = [];
+          
+        /*
+        for (k in contents){
+            const fpath = entryHelper.getFullPath(parentPath)
+
+            const st = fs.statSync(fpath);
+            if (st.isFile()) {
+                  
+                const contents = fs.readFileSync(fpath, 'utf8');
+                let pageMeta = mark.parseMeta(contents);
+                console.log(pageMeta);
+                children.push({
+                  path: parentPath,
+                  title: (pageMeta.title) ? pageMeta.title : _.startCase(parentFile),
+                  subtitle: (pageMeta.subtitle) ? pageMeta.subtitle : false
+                });
+            }
+            else {
+              return Promise.reject(new Error(lang.t('errors:parentinvalid')))
+            }
+        }
+         */  
+        return children;  
+    })
+    .catch(function (e){
+        console.trace(e);
+    });
   },
 
   /**

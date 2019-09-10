@@ -33,7 +33,8 @@ module.exports = {
           output: path.join(ROOTPATH, './logs/wiki-output.log'),
           error: path.join(ROOTPATH, './logs/wiki-error.log'),
           minUptime: 5000,
-          maxRestarts: 5
+          maxRestarts: 5,
+          interpreterArgs: ["--stack-trace-limit=1000", "--stack-size=1024"]
         }).then(() => {
           spinner.succeed('Wiki.js has started successfully.')
         }).finally(() => {

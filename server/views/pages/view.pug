@@ -57,6 +57,14 @@ block content
                   a(href='/' + pageData.parent.path)
                     i.icon-reply
                     span= pageData.parent.title
+                    
+              if pageData.children
+                each child in pageData.children
+                  li
+                    a(href='/' + child.path)
+                      i.icon-reply
+                      span= child.title
+                    
               if !isGuest
                 li
                   a(href='/admin')
