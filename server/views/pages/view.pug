@@ -44,6 +44,19 @@ block content
             .sidebar-label
               span= t('sidebar.navigation')
             ul.sidebar-menu
+              if !isGuest
+                li
+                  a(href='/admin')
+                    i.nc-icon-outline.ui-1_settings-gear-63
+                    span= t('nav.settings')
+              else
+                li
+                  a(href='/login')
+                    i.nc-icon-outline.arrows-1_log-in
+                    span= t('nav.login')
+                    
+              li(style='height:8px; border-bottom:1px solid #666666;margin:8px;margin-top:0px;')
+              
               li
                 a(href='/')
                   i.nc-icon-outline.ui-1_home-minimal
@@ -59,22 +72,12 @@ block content
                     span= pageData.parent.title
                     
               if pageData.children
-                each child in pageData.children
-                  li
-                    a(href='/' + child.path)
-                      i.icon-reply
-                      span= child.title
+                  each child in pageData.children
+                    li
+                      a(href='/' + child.path)
+                        i.icon-arrow-right2(style='padding-left:12px;')
+                        span=child.title
                     
-              if !isGuest
-                li
-                  a(href='/admin')
-                    i.nc-icon-outline.ui-1_settings-gear-63
-                    span= t('nav.settings')
-              else
-                li
-                  a(href='/login')
-                    i.nc-icon-outline.arrows-1_log-in
-                    span= t('nav.login')
           aside.sidebar-pagecontents
             .sidebar-label
               span= t('sidebar.pagecontents')

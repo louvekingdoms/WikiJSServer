@@ -65,7 +65,7 @@ module.exports = {
    */
   fetch(entryPath) {
     let self = this
-
+    
     let cpath = entryHelper.getCachePath(entryPath)
 
     return fs.statAsync(cpath).then((st) => {
@@ -75,14 +75,20 @@ module.exports = {
     }).then((isCache) => {
       if (isCache) {
         // Load from cache
-
-        return fs.readFileAsync(cpath).then((contents) => {
-          return JSON.parse(contents)
-        }).catch((err) => { // eslint-disable-line handle-callback-err
-          winston.error('Corrupted cache file. Deleting it...')
-          fs.unlinkSync(cpath)
-          return false
-        })
+        
+        return self.getChildrenInfo(entryPath).then((children) => {
+            return fs.readFileAsync(cpath).then((contents) => {
+              let content = JSON.parse(contents)
+              if (children.length > 0){
+                content.children = children;
+              }
+              return content;
+            }).catch((err) => { // eslint-disable-line handle-callback-err
+              winston.error('Corrupted cache file. Deleting it...')
+              fs.unlinkSync(cpath)
+              return false
+            })
+        });
       } else {
         // Load original
 
@@ -90,6 +96,7 @@ module.exports = {
       }
     })
   },
+  
 
   /**
    * Fetches the original document entry
@@ -145,8 +152,6 @@ module.exports = {
             
             
             // Get children
-
-/*
             let childrenPromise = (options.includeChildrenInfo) ? self.getChildrenInfo(entryPath).then((children) => {
               if (children.length > 0)
                 return (pageData.children = children)
@@ -154,9 +159,9 @@ module.exports = {
             }).catch((err) => { // eslint-disable-line handle-callback-err
               return (pageData.children = false)
             }) : Promise.resolve(true)
-*/
+
             return parentPromise.then(() => {
-                //childrenPromise.then(() => {
+                return childrenPromise.then(() => {
                   // Cache to disk
 
                   if (options.cache) {
@@ -169,8 +174,8 @@ module.exports = {
                   } else {
                     return true
                   }
-                //})
-            }).return(pageData);
+                }).return(pageData);
+            })
           })
         })
       } else {
@@ -221,23 +226,19 @@ module.exports = {
    * @return     {Promise<Object|False>}  The children information.
    */
   getChildrenInfo(entryPath) {
-    
-    db.Entry.find({ parentPath: entryPath }).sort({ title: 'asc' }).then(contents => {
-    
+    return db.Entry.find({parentPath: entryPath }).then(pages => {
         let children = [];
           
-        /*
-        for (k in contents){
-            const fpath = entryHelper.getFullPath(parentPath)
+        for (let k in pages){
+            const fpath = entryHelper.getFullPath(pages[k]._id)
 
             const st = fs.statSync(fpath);
             if (st.isFile()) {
                   
                 const contents = fs.readFileSync(fpath, 'utf8');
                 let pageMeta = mark.parseMeta(contents);
-                console.log(pageMeta);
                 children.push({
-                  path: parentPath,
+                  path: pages[k]._id,
                   title: (pageMeta.title) ? pageMeta.title : _.startCase(parentFile),
                   subtitle: (pageMeta.subtitle) ? pageMeta.subtitle : false
                 });
@@ -246,11 +247,12 @@ module.exports = {
               return Promise.reject(new Error(lang.t('errors:parentinvalid')))
             }
         }
-         */  
-        return children;  
+        
+        return Promise.resolve(children);  
     })
     .catch(function (e){
-        console.trace(e);
+        winston.error('Error while fetching children pages');
+        winston.error(e);
     });
   },
 
@@ -288,7 +290,7 @@ module.exports = {
    * @param      {String}   entryPath  The entry path
    * @return     {Promise}  Promise of the operation
    */
-  updateCache(entryPath) {
+  updateCache(entryPath, updateChildren=false) {
     let self = this
 
     return self.fetchOriginal(entryPath, {
@@ -297,6 +299,7 @@ module.exports = {
       parseTree: true,
       includeMarkdown: true,
       includeParentInfo: true,
+      includeChildrenInfo: updateChildren,
       cache: true
     }).catch(err => {
       winston.error(err)
@@ -332,7 +335,7 @@ module.exports = {
       })
     }).then(result => {
       return self.updateTreeInfo().then(() => {
-        return result
+          return result
       })
     }).catch(err => {
       winston.error(err)
