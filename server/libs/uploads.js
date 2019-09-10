@@ -112,11 +112,12 @@ module.exports = {
    * @param      {String}  fld     Folder
    * @return     {Array<Object>}  The files matching the query
    */
-  getUploadsFiles (cat, fld) {
-    return db.UplFile.find({
+  getUploadsFiles (cat, fld) {	  
+    const files = db.UplFile.find({
       category: cat,
       folder: 'f:' + fld
     }).sort('filename').exec()
+	return files;
   },
 
   /**

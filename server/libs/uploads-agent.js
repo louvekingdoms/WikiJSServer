@@ -58,10 +58,13 @@ module.exports = {
 
     self._watcher.on('add', (p) => {
       let pInfo = self.parseUploadsRelPath(p)
-      return self.processFile(pInfo.folder, pInfo.filename).then((mData) => {
+      return self.processFile(pInfo.folder, pInfo.filename)
+	  .then((mData) => {
+		const id = mData._id;
 		delete mData._id;
-        return db.UplFile.findByIdAndUpdate(mData._id, mData, { upsert: true })
-      }).then(() => {
+        return db.UplFile.findByIdAndUpdate(id, mData, { upsert: true })
+      })
+	  .then(() => {
         return git.commitUploads(lang.t('git:uploaded', { path: p }))
       })
     })

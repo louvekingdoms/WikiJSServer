@@ -163,18 +163,13 @@ module.exports = {
 
     f = fname + fext
     let fpath = path.resolve(this._uploadsPath, fld, f)
-	
-	console.log("Resolving "+fpath+" to see if the file exists...");
-	
+		
     return fs.statAsync(fpath).then((s) => {
       throw new Error(lang.t('errors:fileexists', { path: f }))
     }).catch((err) => {
       if (err.code === 'ENOENT') {
-		console.log("It doesnt, lets go");
         return f
       }
-	console.log("Arh, it does.");
-	console.log(err);
       throw err
     })
   }
