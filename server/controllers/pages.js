@@ -229,7 +229,7 @@ router.get('/*', (req, res, next) => {
 
   entries.fetch(safePath).then((pageData) => {
     if (pageData) {
-      res.render('pages/view', { pageData })
+      res.render('pages/view', { pageData: pageData })
     } else {    
       res.status(404).render('error-notexist', {
         newpath: safePath
