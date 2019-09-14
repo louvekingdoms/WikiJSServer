@@ -23,8 +23,8 @@ html(data-logic='login')
 
   body
     #bg
-      each bg in _.sampleSize([1, 2, 3],3)
-        div(style='background-image:url(/images/bg_' + bg + '.jpg);')
+      each bg in backgrounds
+        div(style='background-image:url("data:image/jpg;base64, '+bg+'");')
     #root
       h1= appconfig.title
       h2= t('auth:loginrequired')

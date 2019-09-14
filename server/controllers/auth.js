@@ -1,6 +1,6 @@
 'use strict'
 
-/* global db, lang */
+/* global db, lang, git */
 
 const Promise = require('bluebird')
 const express = require('express')
@@ -9,6 +9,7 @@ const passport = require('passport')
 const ExpressBrute = require('express-brute')
 const ExpressBruteMongooseStore = require('express-brute-mongoose')
 const moment = require('moment')
+const fs = require('fs');
 
 /**
  * Setup Express-Brute
@@ -34,8 +35,19 @@ const bruteforce = new ExpressBrute(EBstore, {
  * Login form
  */
 router.get('/login', function (req, res, next) {
+  const bgFiles = fs.readdirSync(git.getRepoPath()+"/backgrounds");
+  let backgrounds = [];
+  
+  for (let k in bgFiles){
+    const fullPath = git.getRepoPath()+"/backgrounds/"+bgFiles[k];
+    if (fs.lstatSync(fullPath).isDirectory()) continue;
+    backgrounds.push(new Buffer(fs.readFileSync(fullPath)).toString('base64'))
+  }
+  
+  
   res.render('auth/login', {
-    usr: res.locals.usr
+    usr: res.locals.usr,
+    backgrounds: backgrounds
   })
 })
 
