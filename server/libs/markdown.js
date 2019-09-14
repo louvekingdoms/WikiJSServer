@@ -12,6 +12,7 @@ const mdFootnote = require('markdown-it-footnote')
 const mdExternalLinks = require('markdown-it-external-links')
 const mdExpandTabs = require('markdown-it-expand-tabs')
 const mdAttrs = require('markdown-it-attrs')
+const mdContainer = require('markdown-it-container')
 const mdMathjax = require('markdown-it-mathjax')()
 const mathjax = require('mathjax-node')
 const hljs = require('highlight.js')
@@ -56,6 +57,7 @@ var mkdown = md({
     tabWidth: 4
   })
   .use(mdAttrs)
+  .use(mdContainer, "warning")
 
 if (appconfig.features.mathjax) {
   mkdown.use(mdMathjax)
