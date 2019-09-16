@@ -20,6 +20,14 @@ const cheerio = require('cheerio')
 const _ = require('lodash')
 const mdRemove = require('remove-markdown')
 
+
+// containers correspondances
+const containers = [
+    {name: "info", entry:'<blockquote class="is-info"><b>Note</b><br>\n', exit: '</blockquote>\n'},
+    {name: "warning", entry:'<blockquote class="is-warning"><b>Warning</b><br>\n', exit: '</blockquote>\n'},
+    {name: "danger", entry:'<blockquote class="is-danger"><b>Danger</b><br>\n', exit: '</blockquote>\n'}
+];
+
 // Load plugins
 
 var mkdown = md({
@@ -44,9 +52,8 @@ var mkdown = md({
   .use(mdAnchor, {
     slugify: _.kebabCase,
     permalink: true,
-    permalinkClass: 'toc-anchor nc-icon-outline location_bookmark-add',
-    permalinkSymbol: '',
-    permalinkBefore: true
+    permalinkClass: 'toc-anchor icon-link2',
+    permalinkSymbol: ''
   })
   .use(mdFootnote)
   .use(mdExternalLinks, {
@@ -56,8 +63,21 @@ var mkdown = md({
   .use(mdExpandTabs, {
     tabWidth: 4
   })
-  .use(mdAttrs)
-  .use(mdContainer, "warning")
+  .use(mdAttrs);
+  
+  for (let k in containers){
+    const container = containers[k];
+    mkdown.use(mdContainer, container.name, {  
+        render: function (tokens, idx) {
+            if (tokens[idx].nesting === 1) {
+                return container.entry+"\n"; 
+            } else { 
+                return container.exit+"\n";
+            }
+        }
+    });
+  }
+
 
 if (appconfig.features.mathjax) {
   mkdown.use(mdMathjax)
