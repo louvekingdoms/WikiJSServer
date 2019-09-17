@@ -23,9 +23,9 @@ const mdRemove = require('remove-markdown')
 
 // containers correspondances
 const containers = [
-    {name: "info", entry:'<blockquote class="is-info"><b>Note</b><br>\n', exit: '</blockquote>\n'},
-    {name: "warning", entry:'<blockquote class="is-warning"><b>Warning</b><br>\n', exit: '</blockquote>\n'},
-    {name: "danger", entry:'<blockquote class="is-danger"><b>Danger</b><br>\n', exit: '</blockquote>\n'}
+    {name: "info", entry:'<blockquote class="is-info"><span class="title"><i class="nc-icon-outline travel_info"></i>Note</span><br>\n', exit: '</blockquote>\n'},
+    {name: "warning", entry:'<blockquote class="is-warning"><span class="title"><i class="nc-icon-outline ui-2_alert-circle"></i>Warning</span><br>\n', exit: '</blockquote>\n'},
+    {name: "danger", entry:'<blockquote class="is-danger"><span class="title"><i class="nc-icon-outline ui-2_alert-circle-"></i>Danger</font></span><br>\n', exit: '</blockquote>\n'}
 ];
 
 // Load plugins
