@@ -21,6 +21,7 @@ router.get('/edit/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(_.replace(req.path, '/edit', ''))
+  res.locals.pageTitle = safePath;
 
   entries.fetchOriginal(safePath, {
     parseMarkdown: false,
@@ -83,6 +84,7 @@ router.get('/create/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(_.replace(req.path, '/create', ''))
+  res.locals.pageTitle = safePath;
 
   entries.exists(safePath).then((docExists) => {
     if (!docExists) {
@@ -226,6 +228,8 @@ router.post('/hist', (req, res, next) => {
  */
 router.get('/*', (req, res, next) => {
   let safePath = entryHelper.parsePath(req.path)
+  const pathElements = safePath.split("/");
+  res.locals.pageTitle = pathElements[pathElements.length-1].toUpperCase();
 
   entries.fetch(safePath).then((pageData) => {
     if (pageData) {
