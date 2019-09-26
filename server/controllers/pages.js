@@ -21,7 +21,7 @@ router.get('/edit/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(_.replace(req.path, '/edit', ''))
-  res.locals.pageTitle = safePath;
+  res.locals.pageTitle = "E:"+makeTitle(safePath);
 
   entries.fetchOriginal(safePath, {
     parseMarkdown: false,
@@ -54,6 +54,7 @@ router.put('/edit/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(_.replace(req.path, '/edit', ''))
+  res.locals.pageTitle = "E:"+makeTitle(safePath);
 
   entries.update(safePath, req.body.markdown, req.user).then(() => {
     return res.json({
@@ -84,7 +85,7 @@ router.get('/create/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(_.replace(req.path, '/create', ''))
-  res.locals.pageTitle = safePath;
+  res.locals.pageTitle = "C:"+makeTitle(safePath);
 
   entries.exists(safePath).then((docExists) => {
     if (!docExists) {
@@ -123,6 +124,7 @@ router.put('/create/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(_.replace(req.path, '/create', ''))
+  res.locals.pageTitle = "C:"+makeTitle(safePath);
 
   entries.create(safePath, req.body.markdown, req.user).then(() => {
     return res.json({
@@ -160,6 +162,7 @@ router.use((req, res, next) => {
  */
 router.get('/source/*', (req, res, next) => {
   let safePath = entryHelper.parsePath(_.replace(req.path, '/source', ''))
+  res.locals.pageTitle = "S:"+makeTitle(safePath);
 
   entries.fetchOriginal(safePath, {
     parseMarkdown: false,
@@ -188,6 +191,7 @@ router.get('/source/*', (req, res, next) => {
  */
 router.get('/hist/*', (req, res, next) => {
   let safePath = entryHelper.parsePath(_.replace(req.path, '/hist', ''))
+  res.locals.pageTitle = "H:"+makeTitle(safePath);
 
   entries.getHistory(safePath).then((pageData) => {
     if (pageData) {
@@ -210,6 +214,7 @@ router.get('/hist/*', (req, res, next) => {
 router.post('/hist', (req, res, next) => {
   let commit = req.body.commit
   let safePath = entryHelper.parsePath(req.body.path)
+  res.locals.pageTitle = "H:"+makeTitle(safePath);
 
   if (!/^[a-f0-9]{40}$/.test(commit)) {
     return res.status(400).json({ ok: false, error: 'Invalid commit' })
@@ -228,8 +233,7 @@ router.post('/hist', (req, res, next) => {
  */
 router.get('/*', (req, res, next) => {
   let safePath = entryHelper.parsePath(req.path)
-  const pathElements = safePath.split("/");
-  res.locals.pageTitle = pathElements[pathElements.length-1].toUpperCase();
+  res.locals.pageTitle = makeTitle(safePath);
 
   entries.fetch(safePath).then((pageData) => {
     if (pageData) {
@@ -318,3 +322,8 @@ router.delete('/*', (req, res, next) => {
 })
 
 module.exports = router
+
+function makeTitle(path){
+    const pathElements = safePath.split("/");
+    return pathElements[pathElements.length-1].toUpperCase();
+}
