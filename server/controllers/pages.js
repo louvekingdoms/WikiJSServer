@@ -274,6 +274,7 @@ router.put('/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(req.path)
+  res.locals.pageTitle = "M:"+makeTitle(safePath);
 
   if (_.isEmpty(req.body.move)) {
     return res.json({
@@ -308,6 +309,7 @@ router.delete('/*', (req, res, next) => {
   }
 
   let safePath = entryHelper.parsePath(req.path)
+  res.locals.pageTitle = "D:"+makeTitle(safePath);
 
   entries.remove(safePath, req.user).then(() => {
     res.json({
@@ -324,6 +326,6 @@ router.delete('/*', (req, res, next) => {
 module.exports = router
 
 function makeTitle(path){
-    const pathElements = safePath.split("/");
+    const pathElements = path.split("/");
     return pathElements[pathElements.length-1].toUpperCase();
 }
