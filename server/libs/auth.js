@@ -13,7 +13,7 @@ module.exports = function (passport) {
   })
 
   passport.deserializeUser(function (id, done) {
-    db.User.findById(id).then((user) => {
+    db.findUserById(id).then((user) => {
       if (user) {
         done(null, user)
       } else {

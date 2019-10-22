@@ -61,7 +61,7 @@ const i18nBackend = require('i18next-node-fs-backend')
 const passport = require('passport')
 const passportSocketIo = require('passport.socketio')
 const session = require('express-session')
-const SessionMongoStore = require('connect-mongo')(session)
+const SQLiteStore = require('connect-sqlite3')(session);
 const graceful = require('node-graceful')
 const socketio = require('socket.io')
 
@@ -100,10 +100,7 @@ require('./libs/auth')(passport)
 global.rights = require('./libs/rights')
 global.rights.init()
 
-let sessionStore = new SessionMongoStore({
-  mongooseConnection: global.db.connection,
-  touchAfter: 15
-})
+let sessionStore = new SQLiteStore
 
 app.use(cookieParser())
 app.use(session({

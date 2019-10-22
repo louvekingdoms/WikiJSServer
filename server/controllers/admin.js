@@ -33,20 +33,20 @@ router.post('/profile', (req, res) => {
     return res.render('error-forbidden')
   }
 
-  return db.User.findById(req.user.id).then((usr) => {
+  return db.findUserById(req.user.id).then((usr) => {
     usr.name = _.trim(req.body.name)
     if (usr.provider === 'local' && req.body.password !== '********') {
       let nPwd = _.trim(req.body.password)
       if (nPwd.length < 6) {
         return Promise.reject(new Error('New Password too short!'))
       } else {
-        return db.User.hashPassword(nPwd).then((pwd) => {
+        return db.util.user.hashPassword(nPwd).then((pwd) => {
           usr.password = pwd
-          return usr.save()
+          return db.updateUser(usr)
         })
       }
     } else {
-      return usr.save()
+      return db.updateUser(usr)
     }
   }).then(() => {
     return res.json({ msg: 'OK' })
@@ -55,6 +55,7 @@ router.post('/profile', (req, res) => {
   })
 })
 
+/*
 router.get('/stats', (req, res) => {
   if (res.locals.isGuest) {
     return res.render('error-forbidden')
@@ -111,7 +112,7 @@ router.get('/users/:id', (req, res) => {
       return res.status(404).end() || true
     })
 })
-
+*/
 /**
  * Create / Authorize a new user
  */

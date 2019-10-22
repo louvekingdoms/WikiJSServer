@@ -121,6 +121,7 @@
     "serve-favicon": "~2.4.3",
     "simplemde": "~1.11.2",
     "socket.io": "~2.0.2",
+    "sqlite3": "^4.1.0",
     "stopword": "~0.1.6",
     "stream-to-promise": "~2.2.0",
     "tar": ">=4.4.2",
