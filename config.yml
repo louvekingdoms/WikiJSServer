@@ -2,7 +2,7 @@ title: Wiki
 host: 'http://localhost:3000'
 port: 3000
 paths:
-  repo: 'E:\Projects\Wiki'
+  repo: Wiki
   data: ./data
 uploads:
   maxImageFileSize: 3
@@ -65,7 +65,7 @@ auth:
     tokenURL: OPENID_CONNECT_TOKEN_URL
     emailClaim: OPENID_CONNECT_EMAIL_CLAIM_PATH
     usernameClaim: OPENID_CONNECT_USERNAME_CLAIM_PATH
-sessionSecret: 6eaf8ebe956f8ef6b7bf4adb2339fea1499638ce5648d791f4d21e79caa9f01c
+sessionSecret: 727078930fca3a607386576b9a3ee76a17230c64ff7229df25cff30a4f6edd1a
 db: 'mongodb://localhost:27017/wiki'
 git: false
 features:
