@@ -1,0 +1,5 @@
+[
+    "name TEXT NOT NULL UNIQUE",
+    "mail TEXT NOT NULL UNIQUE",
+    "password TEXT NOT NULL"
+]

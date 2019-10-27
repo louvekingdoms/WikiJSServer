@@ -38,10 +38,54 @@ module.exports = {
     return db.get("users", id);
   },
   
+  // Returns entry by id
+  // id: int
+  findEntryById : function(id){
+    return db.get("entry", id);
+  },
+  
+  getEntriesGroupedBy: function(column){
+    return db.getAll("entry", column);
+  },
+  
   // Updates user row
   // user: {}
   updateUser : function(user){
     return db.update("users", user);
+  },
+  
+  // Updates entry row
+  // entry: {}
+  updateEntry : function(entry){
+    return db.update("entry", entry);
+  },
+  
+  // Updates entry row
+  // entry: {}
+  updateOrInsertEntry : function(entry){
+    return db.replace("entry", entry);
+  },
+  
+  // Finds entries per parent path
+  // parentPath: str
+  findEntriesByParentPath: function(parentPath){
+    return db.findAll("entry", false, {"parentPath":parentPath});
+  },
+  
+  // Finds a single entry per parent path
+  // parentPath: str
+  findEntryByParentPath: function(parentPath){
+    return db.get("entry", parentPath, "parentPath");
+  },
+  
+  // Finds a single entry per parent path
+  // parameters = {}
+  findEntryByParameters: function(parameters){
+    return db.find("entry", parameters);
+  },
+  
+  deleteEntryByPath: function (path){
+    return db.remove("entry", path, "path");
   },
   
   

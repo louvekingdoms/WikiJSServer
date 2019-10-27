@@ -226,7 +226,7 @@ module.exports = {
    * @return     {Promise<Object|False>}  The children information.
    */
   getChildrenInfo(entryPath) {
-    return db.Entry.find({parentPath: entryPath }).then(pages => {
+    return db.findEntriesByParentPath(entryPath).then(pages => {
         let children = [];
           
         for (let k in pages){
@@ -316,20 +316,16 @@ module.exports = {
       return err
     }).then((content) => {
       let parentPath = _.chain(content.entryPath).split('/').initial().join('/').value()
-      return db.Entry.findOneAndUpdate({
-        _id: content.entryPath
-      }, {
+      return db.updateOrInsertEntry({
+        path: content.entryPath,
         title: content.meta.title || content.entryPath,
         subtitle: content.meta.subtitle || '',
         parentTitle: content.parent.title || '',
         parentPath: parentPath,
         isDirectory: false,
         isEntry: true
-      }, {
-        new: true,
-        upsert: true
       }).then(result => {
-        let plainResult = result.toObject()
+        let plainResult = await db.findEntryById(content.id)
         plainResult.text = content.text
         return plainResult
       })
@@ -349,16 +345,25 @@ module.exports = {
    * @returns {Promise<Boolean>} Promise of the operation
    */
   updateTreeInfo() {
-    return db.Entry.distinct('parentPath', { parentPath: { $ne: '' } }).then(allPaths => {
-      if (allPaths.length > 0) {
-        return Promise.map(allPaths, pathItem => {
+    return db.getEntriesGroupedBy("parentPath").then(allPaths => {
+      let paths = [];
+      for(k in allPaths){
+        if (allPaths[k].parentPath != "") paths.push(allPaths[k]);
+      }
+        // Remove null parentPath
+      if (paths.length > 0) {
+        return Promise.map(paths, pathItem => {
           let parentPath = _.chain(pathItem).split('/').initial().join('/').value()
           let guessedTitle = _.chain(pathItem).split('/').last().startCase().value()
-          return db.Entry.update({ _id: pathItem }, {
-            $set: { isDirectory: true },
-            $setOnInsert: { isEntry: false, title: guessedTitle, parentPath }
-          }, { upsert: true })
-        })
+          let newEntry = {
+              id : pathItem.id,
+              isDirectory : true,
+              isEntry : false,
+              title : guessedtitle,
+              parentPath : parentPath
+          }
+          return db.updateOrInsertEntry(newEntry);
+        });
       } else {
         return true
       }
@@ -437,7 +442,7 @@ module.exports = {
         // Create cache for new entry
 
         return Promise.join(
-          db.Entry.deleteOne({ _id: entryPath }),
+          db.deleteEntryByPath(entryPath),
           self.updateCache(newEntryPath).then(entry => {
             return search.add(entry)
           })
@@ -468,7 +473,7 @@ module.exports = {
       search.delete(entryPath)
 
       // Delete entry
-      return db.Entry.deleteOne({ _id: entryPath })
+      return db.deleteEntryByPath(entryPath)
     })
   },
 
@@ -494,15 +499,16 @@ module.exports = {
    * @return {Promise<Array>} List of entries
    */
   getFromTree(basePath, usr) {
-    return db.Entry.find({ parentPath: basePath }, 'title parentPath isDirectory isEntry').sort({ title: 'asc' }).then(results => {
+      // TODO: Reimplement sorting
+    return db.findEntriesByParentPath(basePath).then(results => {
       return _.filter(results, r => {
-        return rights.checkRole('/' + r._id, usr.rights, 'read')
+        return rights.checkRole('/' + r.path, usr.rights, 'read')
       })
     })
   },
 
   getHistory(entryPath) {
-    return db.Entry.findOne({ _id: entryPath, isEntry: true }).then(entry => {
+    return db.findEntryByParameters({ path: entryPath, isEntry: true }).then(entry => {
       if (!entry) { return false }
       return git.getHistory(entryPath).then(history => {
         return {

@@ -35,7 +35,15 @@ module.exports = () => {
         // columns: str[]
         createTable: function(name, columns){
             return new Promise(function(resolve,reject) {
-                database.run("CREATE TABLE `"+name+"` (id INTEGER PRIMARY KEY, "+columns.join(',')+")", function(err){if (err) reject(err); else resolve()});
+                database.run(
+                    "CREATE TABLE `"+name+"` ("
+                        +"id INTEGER PRIMARY KEY, "
+                        +columns.join(',')+", "
+                        +"updateTime DATETIME DEFAULT current_timestamp, "
+                        +"createTime DATETIME DEFAULT current_timestamp"
+                        +")",
+                    function(err){if (err) reject(err); else resolve()}
+                );
             });
         },
 
@@ -46,6 +54,23 @@ module.exports = () => {
         aCreateTable: async function (name, columns, callback){
             const done = await createTable(name, columns);
             callback();
+        },
+        
+        // Create table if not exists
+        // name: str
+        // columns: str[]
+        createTableIfNotExists: function(name, columns){
+            return new Promise(function(resolve,reject) {
+                database.run(
+                    "CREATE TABLE IF NOT EXISTS `"+name+"` ("
+                        +"id INTEGER PRIMARY KEY, "
+                        +columns.join(',')+", "
+                        +"updateTime DATETIME DEFAULT current_timestamp, "
+                        +"createTime DATETIME DEFAULT current_timestamp"
+                        +")",
+                    function(err){if (err) reject(err); else resolve()}
+                );
+            });
         },
 
         // Updates data in table for row id
@@ -77,6 +102,21 @@ module.exports = () => {
             });
         },
 
+        // Inserts or updates data into table
+        // tableName: str
+        // data: {row=>value, ...}
+        replace: function (tableName, data){
+            let rows = [];
+            let values = [];
+            for (k in data){
+                rows.push(k);
+                values.push(data[k]);
+            }
+            return new Promise(function (resolve, reject){
+                database.run("REPLACE INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ('"+values.join("', '")+"')", function(err){if (err) reject(err); else resolve()});
+            });
+        },
+
         // Inserts into table using async syntax
         // tableName: str
         // data: {row=>value, ...}
@@ -88,20 +128,71 @@ module.exports = () => {
 
         // Gets data from the table
         // tableName: str
-        // id: int
-        get: function (tableName, id){
+        // id: str
+        // [columnName: str]
+        get: function (tableName, id, columnName="id"){
             return new Promise(function (resolve, reject){
-                database.run("SELECT FROM `"+tableName+"` WHERE id="+id+"", function(err, row){if (err) reject(err); else resolve(row)});
+                database.get("SELECT FROM `"+tableName+"` WHERE "+columnName+"=?", id, function(err, row){if (err) reject(err); else resolve(row)});
             });
         },
 
-        // Inserts into table using async syntax
+        // Gets data from the table
         // tableName: str
-        // data: {row=>value, ...}
-        // callback: ()
-        aInsert: async function (tableName, data, callback){
-            const done = await insert(tableName, data);
-            callback();
+        // parameters: {}
+        find: function (tableName, parameters){
+            let equalities = [];
+            if (parameters){
+                for (k in where){
+                    equalities.push(k+" = "+parameters[k]);
+                }
+            }
+            return new Promise(function (resolve, reject){
+                database.get("SELECT FROM `"+tableName+"` WHERE "+equalities.join(" AND "), function(err, row){if (err) reject(err); else resolve(row)});
+            });
+        },
+        
+        // Gets multiple rows from the table
+        // tableName: str
+        // [groupBy: str]
+        // [parameters: {}]
+        findAll: function(tableName, groupBy=false, parameters=false){
+            let equalities = [];
+            if (parameters){
+                for (k in parameters){
+                    equalities.push(k+" = "+parameters[k]);
+                }
+            }
+            return new Promise(function (resolve, reject){
+                database.all(
+                    "SELECT FROM `"+tableName+"`" 
+                    + (parameters ? "WHERE "+equalities.join(" AND ") : "")
+                    + (groupBy ? "GROUP BY "+groupBy : ""), 
+                    function(err, rows){if (err) reject(err); else resolve(rows)}
+                );
+            });
+        },
+        
+        // Gets multiple rows from the table
+        // tableName: str
+        // [groupBy: str]
+        getAll: function(tableName, groupBy=false){
+            return new Promise(function (resolve, reject){
+                database.all(
+                    "SELECT FROM `"+tableName+"`" 
+                    + (groupBy ? "GROUP BY "+groupBy : ""), 
+                    function(err, rows){if (err) reject(err); else resolve(rows)}
+                );
+            });
+        },
+
+        // Deletes data from the table
+        // tableName: str
+        // id: str
+        // [columnName: str]
+        remove: function (tableName, id, columnName="id"){
+            return new Promise(function (resolve, reject){
+                database.run("DELETE FROM `"+tableName+"` WHERE "+columnName+"=?", id, function(err, row){if (err) reject(err); else resolve()});
+            });
         },
         
         // Closes the db connection

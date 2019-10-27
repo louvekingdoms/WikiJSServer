@@ -235,14 +235,15 @@ module.exports = (port, spinner) => {
     
     await db.open();
     
-    await db.createTable("users", [
-        "name TEXT NOT NULL UNIQUE",
-        "mail TEXT NOT NULL UNIQUE",
-        "password TEXT NOT NULL",
-        "updateTime DATETIME DEFAULT current_timestamp",
-        "createTime DATETIME DEFAULT current_timestamp"
-    ]);
-    
+    const models = fs.readdirSync("schemas");
+    for (k in models){
+        const filename = models[k];
+        if (!filename.endsWith(".json")) continue;
+        const tableName = filename.replace(".json", "");
+        const content = require("schemas/"+filename);
+        
+        await db.createTableIfNotExists(tableName, content);
+    }
     
     await db.insert("users", {
        "name": "Administrator",

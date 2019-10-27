@@ -116,6 +116,7 @@ router.get('/users/:id', (req, res) => {
 /**
  * Create / Authorize a new user
  */
+ /*
 router.post('/users/create', (req, res) => {
   if (!res.locals.rights.manage) {
     return res.status(401).json({ msg: 'Unauthorized' })
@@ -213,6 +214,8 @@ router.post('/users/:id', (req, res) => {
 /**
  * Delete / Deauthorize a user
  */
+ 
+/*
 router.delete('/users/:id', (req, res) => {
   if (!res.locals.rights.manage) {
     return res.status(401).json({ msg: lang.t('errors:unauthorized') })
@@ -304,5 +307,6 @@ router.post('/theme', (req, res) => {
 
   return res.json({ msg: 'OK' })
 })
+*/
 
 module.exports = router
