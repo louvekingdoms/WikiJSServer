@@ -2,7 +2,7 @@
 
 /* global ROOTPATH, appconfig, winston */
 
-const db = require('../helpers/db')
+const db = require('../helpers/db')()
 const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')

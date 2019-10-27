@@ -324,8 +324,9 @@ module.exports = {
         parentPath: parentPath,
         isDirectory: false,
         isEntry: true
-      }).then(result => {
-        let plainResult = await db.findEntryById(content.id)
+      }) /// :x should not be async!!
+      .then(async function(result) {
+        let plainResult = await db.findEntryByParentPath(parentPath)
         plainResult.text = content.text
         return plainResult
       })

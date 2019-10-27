@@ -7,7 +7,8 @@ module.exports = () => {
         
         // Returns database event listener
         on: function(){
-            return database.on;
+            return function(){};
+            //return database.on;
         },
         
         // Opens the connection with the dB
