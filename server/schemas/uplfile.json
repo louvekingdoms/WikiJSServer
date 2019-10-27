@@ -7,5 +7,5 @@
     "basename TEXT NOT NULL",
     "filesize NUMBER",
     
-    "FOREIGN KEY (folder_from_uplfolder) REFERENCES uplfolder(name)"
+    "FOREIGN KEY (folder) REFERENCES uplfolder(name)"
 ]

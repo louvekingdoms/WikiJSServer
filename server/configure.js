@@ -54,7 +54,8 @@ module.exports = (port, spinner) => {
   // Controllers
   // ----------------------------------------
 
-  app.get('*', (req, res) => {
+  app.get('*', async function(req, res) {
+      
     let langs = []
     let conf = {}
     try {
@@ -235,12 +236,12 @@ module.exports = (port, spinner) => {
     
     await db.open();
     
-    const models = fs.readdirSync("schemas");
-    for (k in models){
+    const models = fs.readdirSync("server/schemas");
+    for (let k in models){
         const filename = models[k];
         if (!filename.endsWith(".json")) continue;
         const tableName = filename.replace(".json", "");
-        const content = require("schemas/"+filename);
+        const content = require("./schemas/"+tableName);
         
         await db.createTableIfNotExists(tableName, content);
     }

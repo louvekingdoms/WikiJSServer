@@ -38,9 +38,8 @@ module.exports = () => {
                 database.run(
                     "CREATE TABLE `"+name+"` ("
                         +"id INTEGER PRIMARY KEY, "
-                        +columns.join(',')+", "
-                        +"updateTime DATETIME DEFAULT current_timestamp, "
-                        +"createTime DATETIME DEFAULT current_timestamp"
+                        +"createTime DATETIME DEFAULT current_timestamp, "
+                        +columns.join(',')
                         +")",
                     function(err){if (err) reject(err); else resolve()}
                 );
@@ -64,9 +63,8 @@ module.exports = () => {
                 database.run(
                     "CREATE TABLE IF NOT EXISTS `"+name+"` ("
                         +"id INTEGER PRIMARY KEY, "
-                        +columns.join(',')+", "
-                        +"updateTime DATETIME DEFAULT current_timestamp, "
-                        +"createTime DATETIME DEFAULT current_timestamp"
+                        +"createTime DATETIME DEFAULT current_timestamp, "
+                        +columns.join(',')
                         +")",
                     function(err){if (err) reject(err); else resolve()}
                 );
