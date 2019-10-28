@@ -1,4 +1,5 @@
 [
+    "uid TEXT NOT NULL UNIQUE",
     "category TEXT NOT NULL DEFAULT 'binary'",
     "mime TEXT NOT NULL DEFAULT 'application/octet-stream'",
     "extra TEXT DEFAULT NULL",

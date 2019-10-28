@@ -44,6 +44,12 @@ module.exports = {
     return db.get("uplfile", id);
   },
   
+  // Returns uplfile by uid
+  // uid: str
+  findUplFileByUid: function(uid){
+    return db.get("uplfile", uid, "uid");
+  },
+  
   // Finds a single user by object similarity
   // parameters = {}
   findUserByParameters: function(parameters){
@@ -122,6 +128,10 @@ module.exports = {
     return db.remove("uplfile", id);
   },
   
+  deleteUplFileByUid: function (uid){
+    return db.remove("uplfile", uid, "uid");
+  },
+  
   deleteAllUplFolders: function (){
     return db.truncate("uplfolder");
   },
@@ -133,9 +143,11 @@ module.exports = {
   // Add multiple folders to the uplfolder table
   // folders: str[]
   createMultipleUplFolders: function(folders){
+    if (!folders) return Promise.resolve();
     let promises = [];
     for (let k in folders){
         const name = folders[k];
+        if (!name) continue;
         promises.push(db.insert("uplfolder", {name: name}));
     }
     return Promise.all(promises);
@@ -150,9 +162,11 @@ module.exports = {
   // Add multiple files to the uplfile table
   // files: {}[]
   createMultipleUplFiles: function(files){
+    if (!files) return Promise.resolve();
     let promises = [];
     for (let k in files){
         const file = files[k];
+        if (!file) continue;
         promises.push(db.insert("uplfile", file));
     }
     return Promise.all(promises);

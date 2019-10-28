@@ -109,7 +109,6 @@ module.exports = () => {
         // tableName: str
         // data: {row=>value, ...}
         insert: function (tableName, data){
-            console.trace("inserting "+JSON.stringify(data)+" into "+tableName);
             let rows = [];
             let values = [];
             for (k in data){
@@ -162,7 +161,7 @@ module.exports = () => {
             let equalities = [];
             if (parameters){
                 for (k in parameters){
-                    equalities.push(k+" = "+parameters[k]);
+                    equalities.push(k+" = "+(isNaN(parameters[k]) ? "'"+parameters[k]+"'" : parameters[k]));
                 }
             }
             return new Promise(function (resolve, reject){
@@ -178,7 +177,7 @@ module.exports = () => {
             let equalities = [];
             if (parameters){
                 for (k in parameters){
-                    equalities.push(k+" = "+parameters[k]);
+                    equalities.push(k+" = "+(isNaN(parameters[k]) ? "'"+parameters[k]+"'" : parameters[k]));
                 }
             }
             return new Promise(function (resolve, reject){

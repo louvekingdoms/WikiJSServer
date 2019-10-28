@@ -125,7 +125,7 @@ module.exports = {
   deleteUploadsFile (uid) {
     let self = this
 
-    return db.deleteUplFileById(uid).then((f) => {
+    return db.deleteUplFileByUid(uid).then((f) => {
       if (f) {
         return self.deleteUploadsFileTry(f, 0)
       }
@@ -222,7 +222,7 @@ module.exports = {
 
     return db.findUplFolderByName(fld).then((folder) => {
       if (folder) {
-        return db.findUplFileById(uid).then((originFile) => {
+        return db.findUplFileByUid(uid).then((originFile) => {
           // -> Check if rename is valid
 	  
 
@@ -248,7 +248,7 @@ module.exports = {
 
             // -> Delete DB entry
 
-            preMoveOps.push(db.deleteUplFileById(uid))
+            preMoveOps.push(db.deleteUplFileByUid(uid))
 
             // -> Move thumbnail ahead to avoid re-generation
 

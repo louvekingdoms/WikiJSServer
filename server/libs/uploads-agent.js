@@ -60,7 +60,6 @@ module.exports = {
       let pInfo = self.parseUploadsRelPath(p)
       return self.processFile(pInfo.folder, pInfo.filename)
 	  .then((mData) => {
-		const id = mData.id;
         return db.updateOrInsertUplFile(mData)
       })
 	  .then(() => {
@@ -91,11 +90,8 @@ module.exports = {
       }).filter((s) => { return s.stat.isDirectory() }).then((arrDirs) => {
         let folderNames = _.map(arrDirs, 'filename')
         folderNames.unshift('')
-
-        console.log("Preparing to insert folders "+JSON.stringify(folderNames));
         
         // Add folders to DB
-
         return db.deleteAllUplFolders().then(() => {
           return db.createMultipleUplFolders(folderNames)
         }).then(() => {
@@ -185,7 +181,7 @@ module.exports = {
             let cacheThumbnailPathStr = path.format(cacheThumbnailPath)
 
             let mData = {
-              id: fUid,
+              uid: fUid,
               category: 'image',
               mime: mimeInfo.mime,
               extra: JSON.stringify(mImgSize),
