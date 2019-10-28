@@ -33,7 +33,7 @@ module.exports = {
     let self = this
 
     db.onReady.then(() => {
-      db.User.findOne({ provider: 'local', email: 'guest' }).then((u) => {
+      db.findUserByParameters({email: 'guest' }).then((u) => {
         if (u) {
           self.guest = u
         }

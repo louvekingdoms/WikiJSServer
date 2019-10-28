@@ -59,7 +59,7 @@ module.exports = {
     }
 
     return self._isReady.then(() => {
-      return self.delete(content._id).then(() => {
+      return self.delete(content.id).then(() => {
         return self._si.concurrentAddAsync({
           fieldOptions: [{
             fieldName: 'entryPath',
@@ -89,13 +89,13 @@ module.exports = {
             storeable: false
           }]
         }, [{
-          entryPath: content._id,
+          entryPath: content.id,
           title: content.title,
           subtitle: content.subtitle || '',
           parent: content.parent || '',
           content: content.text || ''
         }]).then(() => {
-          winston.log('verbose', 'Entry ' + content._id + ' added/updated to search index.')
+          winston.log('verbose', 'Entry ' + content.id + ' added/updated to search index.')
           return true
         }).catch((err) => {
           winston.error(err)

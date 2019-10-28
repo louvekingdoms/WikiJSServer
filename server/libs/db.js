@@ -38,6 +38,18 @@ module.exports = {
     return db.get("users", id);
   },
   
+  // Returns uplfile by id
+  // id: int
+  findUplFileById : function(id){
+    return db.get("uplfile", id);
+  },
+  
+  // Finds a single user by object similarity
+  // parameters = {}
+  findUserByParameters: function(parameters){
+    return db.find("users", parameters);
+  },
+  
   // Returns entry by id
   // id: int
   findEntryById : function(id){
@@ -54,13 +66,31 @@ module.exports = {
     return db.update("users", user);
   },
   
+  // Updates user row by email
+  // user: {}
+  updateUserByMail : function(user){
+    return db.update("users", user, "mail");
+  },
+  
+  // Finds uplfolder by folder name
+  // name: str
+  findUplFolderByName : function(name){
+    return db.get("uplfolder", name);
+  },
+  
+  // Updates or inserts upl folder
+  // folder: {}
+  updateOrInsertUplFolder : function(folder){
+    return db.replace("uplfolder", folder);
+  },
+  
   // Updates entry row
   // entry: {}
   updateEntry : function(entry){
     return db.update("entry", entry);
   },
   
-  // Updates entry row
+  // Updates or inserts entry row
   // entry: {}
   updateOrInsertEntry : function(entry){
     return db.replace("entry", entry);
@@ -78,7 +108,7 @@ module.exports = {
     return db.get("entry", parentPath, "parentPath");
   },
   
-  // Finds a single entry per parent path
+  // Finds a single entry per object similarity
   // parameters = {}
   findEntryByParameters: function(parameters){
     return db.find("entry", parameters);
@@ -88,6 +118,45 @@ module.exports = {
     return db.remove("entry", path, "path");
   },
   
+  deleteUplFileById: function (id){
+    return db.remove("uplfile", id);
+  },
+  
+  deleteAllUplFolders: function (){
+    return db.truncate("uplfolder");
+  },
+  
+  deleteAllUplFiles: function (){
+    return db.truncate("uplfile");
+  },
+  
+  // Add multiple folders to the uplfolder table
+  // folders: str[]
+  createMultipleUplFolders: function(folders){
+    let promises = [];
+    for (let k in folders){
+        const name = folders[k];
+        promises.push(db.insert("uplfolder", {name: name}));
+    }
+    return Promise.all(promises);
+  },
+  
+  // Updates or inserts uplfile row
+  // uplfile: {}
+  updateOrInsertUplFile : function(uplfile){
+    return db.replace("uplfile", uplfile);
+  },
+  
+  // Add multiple files to the uplfile table
+  // files: {}[]
+  createMultipleUplFiles: function(files){
+    let promises = [];
+    for (let k in files){
+        const file = files[k];
+        promises.push(db.insert("uplfile", file));
+    }
+    return Promise.all(promises);
+  },
   
   util: {
     user: require('../helpers/user')

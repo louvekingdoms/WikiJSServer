@@ -72,17 +72,18 @@ module.exports = () => {
             });
         },
 
-        // Updates data in table for row id
+        // Updates data in table for row determined by given information
         // tableName: str
         // data: {row=>value, ...}
-        update: function (tableName, data){
+        // [column: str]
+        update: function (tableName, data, column="id"){
             let assigns = [];
             for (k in data){
-                if (k === "id") return;
+                if (k === column) return;
                 assigns.push("`"+k+"`='"+data[k]+"'");
             }
             return new Promise(function (resolve, reject){
-                database.run("UPDATE `"+tableName+"` SET ("+assigns.join(", ")+") WHERE id = ?", data.id, function(err){if (err) reject(err); else resolve()});
+                database.run("UPDATE `"+tableName+"` SET ("+assigns.join(", ")+") WHERE "+column+" = ?", data[column], function(err){if (err) reject(err); else resolve()});
             });
         },
 
@@ -141,7 +142,7 @@ module.exports = () => {
         find: function (tableName, parameters){
             let equalities = [];
             if (parameters){
-                for (k in where){
+                for (k in parameters){
                     equalities.push(k+" = "+parameters[k]);
                 }
             }
@@ -191,6 +192,14 @@ module.exports = () => {
         remove: function (tableName, id, columnName="id"){
             return new Promise(function (resolve, reject){
                 database.run("DELETE FROM `"+tableName+"` WHERE "+columnName+"=?", id, function(err, row){if (err) reject(err); else resolve()});
+            });
+        },
+
+        // Empties a table
+        // tableName: str
+        truncate: function (tableName){
+            return new Promise(function (resolve, reject){
+                database.run("DELETE FROM `"+tableName+"`", function(err, row){if (err) reject(err); else resolve()});
             });
         },
         

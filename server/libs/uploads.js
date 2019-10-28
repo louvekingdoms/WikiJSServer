@@ -69,12 +69,8 @@ module.exports = {
     }
 
     return fs.ensureDirAsync(path.join(self._uploadsPath, folderName)).then(() => {
-      return db.UplFolder.findOneAndUpdate({
-        _id: 'f:' + folderName
-      }, {
+      return db.updateOrInsertUplFolder({
         name: folderName
-      }, {
-        upsert: true
       })
     }).then(() => {
       return self.getUploadsFolders()
@@ -88,7 +84,7 @@ module.exports = {
    * @return     {Boolean}   True if valid
    */
   validateUploadsFolder (folderName) {
-    return db.UplFolder.findOne({ name: folderName }).then((f) => {
+    return db.findUplFolderByName(folderName).then((f) => {
       return (f) ? path.resolve(this._uploadsPath, folderName) : false
     })
   },
@@ -129,7 +125,7 @@ module.exports = {
   deleteUploadsFile (uid) {
     let self = this
 
-    return db.UplFile.findOneAndRemove({ _id: uid }).then((f) => {
+    return db.deleteUplFileById(uid).then((f) => {
       if (f) {
         return self.deleteUploadsFileTry(f, 0)
       }
@@ -143,7 +139,7 @@ module.exports = {
     let fFolder = (f.folder && f.folder !== 'f:') ? f.folder.slice(2) : './'
 
     return Promise.join(
-      fs.removeAsync(path.join(self._uploadsThumbsPath, f._id + '.png')),
+      fs.removeAsync(path.join(self._uploadsThumbsPath, f.id + '.png')),
       fs.removeAsync(path.resolve(self._uploadsPath, fFolder, f.filename))
     ).catch((err) => {
       if (err.code === 'EBUSY' && attempt < 5) {
@@ -224,9 +220,9 @@ module.exports = {
   moveUploadsFile (uid, fld, nFilename) {
     let self = this;
 
-    return db.UplFolder.findById('f:' + fld).then((folder) => {
+    return db.findUplFolderByName(fld).then((folder) => {
       if (folder) {
-        return db.UplFile.findById(uid).then((originFile) => {
+        return db.findUplFileById(uid).then((originFile) => {
           // -> Check if rename is valid
 	  
 
@@ -252,13 +248,13 @@ module.exports = {
 
             // -> Delete DB entry
 
-            preMoveOps.push(db.UplFile.findByIdAndRemove(uid))
+            preMoveOps.push(db.deleteUplFileById(uid))
 
             // -> Move thumbnail ahead to avoid re-generation
 
             if (originFile.category === 'image') {
               let fUid = crypto.createHash('md5').update(folder.name + '/' + destFilename).digest('hex')
-              let sourceThumbPath = path.resolve(self._uploadsThumbsPath, originFile._id + '.png')
+              let sourceThumbPath = path.resolve(self._uploadsThumbsPath, originFile.id + '.png')
               let destThumbPath = path.resolve(self._uploadsThumbsPath, fUid + '.png')
               preMoveOps.push(fs.moveAsync(sourceThumbPath, destThumbPath))
             } else {

@@ -230,7 +230,7 @@ module.exports = {
         let children = [];
           
         for (let k in pages){
-            const fpath = entryHelper.getFullPath(pages[k]._id)
+            const fpath = entryHelper.getFullPath(pages[k].id)
 
             const st = fs.statSync(fpath);
             if (st.isFile()) {
@@ -238,7 +238,7 @@ module.exports = {
                 const contents = fs.readFileSync(fpath, 'utf8');
                 let pageMeta = mark.parseMeta(contents);
                 children.push({
-                  path: pages[k]._id,
+                  path: pages[k].id,
                   title: (pageMeta.title) ? pageMeta.title : _.startCase(parentFile),
                   subtitle: (pageMeta.subtitle) ? pageMeta.subtitle : false
                 });

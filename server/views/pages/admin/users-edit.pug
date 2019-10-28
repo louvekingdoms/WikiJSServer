@@ -23,7 +23,7 @@ block adminContent
             th= t('admin:users.updatedon')
         tbody
           tr
-            td.is-centered= usr._id
+            td.is-centered= usr.id
             td.is-centered.has-icons
               case usr.provider
                 when 'local': i.nc-icon-outline.ui-1_database
@@ -119,4 +119,4 @@ block adminContent
                   i.nc-icon-outline.ui-1_trash
                   span Delete Account
 
-  modal-delete-user(current-user=usr._id)
+  modal-delete-user(current-user=usr.id)
