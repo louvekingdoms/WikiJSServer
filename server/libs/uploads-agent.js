@@ -92,6 +92,8 @@ module.exports = {
         let folderNames = _.map(arrDirs, 'filename')
         folderNames.unshift('')
 
+        console.log("Preparing to insert folders "+JSON.stringify(folderNames));
+        
         // Add folders to DB
 
         return db.deleteAllUplFolders().then(() => {
@@ -116,7 +118,7 @@ module.exports = {
           }, {concurrency: 1}).finally(() => {
             // Add files to DB
 
-            return db.deleteAllUplFiles).then(() => {
+            return db.deleteAllUplFiles().then(() => {
               if (_.isArray(allFiles) && allFiles.length > 0) {
                 return db.createMultipleUplFiles(allFiles)
               } else {
@@ -186,7 +188,7 @@ module.exports = {
               id: fUid,
               category: 'image',
               mime: mimeInfo.mime,
-              extra: mImgSize,
+              extra: JSON.stringify(mImgSize),
               folder: 'f:' + fldName,
               filename: f,
               basename: fPathObj.name,

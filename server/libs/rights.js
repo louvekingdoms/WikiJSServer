@@ -11,7 +11,7 @@ module.exports = {
 
   guest: {
     provider: 'local',
-    email: 'guest',
+    mail: 'guest',
     name: 'Guest',
     password: '',
     rights: [
@@ -33,7 +33,7 @@ module.exports = {
     let self = this
 
     db.onReady.then(() => {
-      db.findUserByParameters({email: 'guest' }).then((u) => {
+      db.findUserByParameters({mail: 'guest' }).then((u) => {
         if (u) {
           self.guest = u
         }

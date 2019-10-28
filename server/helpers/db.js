@@ -1,5 +1,16 @@
 
+
+function trace(a, t=""){
+    a = a.slice(0);
+    a.pop();
+    const d = {info: console.log};
+    let w = d;
+    if (typeof winston !== 'undefined') w = winston;
+    w.info("[SQL "+t.toUpperCase()+"] "+a.join(", "));
+}
+
 module.exports = () => {
+    const fs = require('fs');
     const sqlite3 = require('sqlite3').verbose();
     let database;
     
@@ -14,11 +25,18 @@ module.exports = () => {
         // Opens the connection with the dB
         open: function(){
             return new Promise(resolve => {
-                database = new sqlite3.Database(process.cwd()+"/data/db.db", (err) => {
+                const realDB = new sqlite3.Database(process.cwd()+"/data/db.db", (err) => {
                     if (err) {
                         return console.error(err.message);
                     }
-                    console.log('Connected to the disk database');
+                    trace(['Connected to the disk database', null]);
+                    
+                    database = {
+                        run: function(...args){trace(args, "run"); realDB.run.apply(realDB, args);},
+                        get: function(...args){trace(args, "get"); realDB.get.apply(realDB, args);},
+                        all: function(...args){trace(args, "all"); realDB.all.apply(realDB, args);},
+                        close: function(...args){trace(args, "close"); realDB.close.apply(realDB, args);},
+                    }                    
                     resolve();
                 });
             });
@@ -80,7 +98,7 @@ module.exports = () => {
             let assigns = [];
             for (k in data){
                 if (k === column) return;
-                assigns.push("`"+k+"`='"+data[k]+"'");
+                assigns.push("`"+k+"`="+(isNaN(data[k]) ? "'"+data[k]+"'" : data[k])+"");
             }
             return new Promise(function (resolve, reject){
                 database.run("UPDATE `"+tableName+"` SET ("+assigns.join(", ")+") WHERE "+column+" = ?", data[column], function(err){if (err) reject(err); else resolve()});
@@ -91,14 +109,15 @@ module.exports = () => {
         // tableName: str
         // data: {row=>value, ...}
         insert: function (tableName, data){
+            console.trace("inserting "+JSON.stringify(data)+" into "+tableName);
             let rows = [];
             let values = [];
             for (k in data){
                 rows.push(k);
-                values.push(data[k]);
+                values.push(isNaN(data[k]) ? "'"+data[k]+"'" : data[k]);
             }
             return new Promise(function (resolve, reject){
-                database.run("INSERT INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ('"+values.join("', '")+"')", function(err){if (err) reject(err); else resolve()});
+                database.run("INSERT INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ("+values.join(", ")+")", function(err){if (err) reject(err); else resolve()});
             });
         },
 
@@ -110,10 +129,10 @@ module.exports = () => {
             let values = [];
             for (k in data){
                 rows.push(k);
-                values.push(data[k]);
+                values.push(isNaN(data[k]) ? "'"+data[k]+"'" : data[k]);
             }
             return new Promise(function (resolve, reject){
-                database.run("REPLACE INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ('"+values.join("', '")+"')", function(err){if (err) reject(err); else resolve()});
+                database.run("REPLACE INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ("+values.join(", ")+")", function(err){if (err) reject(err); else resolve()});
             });
         },
 
@@ -132,7 +151,7 @@ module.exports = () => {
         // [columnName: str]
         get: function (tableName, id, columnName="id"){
             return new Promise(function (resolve, reject){
-                database.get("SELECT FROM `"+tableName+"` WHERE "+columnName+"=?", id, function(err, row){if (err) reject(err); else resolve(row)});
+                database.get("SELECT * FROM `"+tableName+"` WHERE "+columnName+"=?", id, function(err, row){if (err) reject(err); else resolve(row)});
             });
         },
 
@@ -147,7 +166,7 @@ module.exports = () => {
                 }
             }
             return new Promise(function (resolve, reject){
-                database.get("SELECT FROM `"+tableName+"` WHERE "+equalities.join(" AND "), function(err, row){if (err) reject(err); else resolve(row)});
+                database.get("SELECT * FROM `"+tableName+"` WHERE "+equalities.join(" AND "), function(err, row){if (err) reject(err); else resolve(row)});
             });
         },
         
@@ -164,7 +183,7 @@ module.exports = () => {
             }
             return new Promise(function (resolve, reject){
                 database.all(
-                    "SELECT FROM `"+tableName+"`" 
+                    "SELECT * FROM `"+tableName+"`" 
                     + (parameters ? "WHERE "+equalities.join(" AND ") : "")
                     + (groupBy ? "GROUP BY "+groupBy : ""), 
                     function(err, rows){if (err) reject(err); else resolve(rows)}
@@ -178,7 +197,7 @@ module.exports = () => {
         getAll: function(tableName, groupBy=false){
             return new Promise(function (resolve, reject){
                 database.all(
-                    "SELECT FROM `"+tableName+"`" 
+                    "SELECT * FROM `"+tableName+"`" 
                     + (groupBy ? "GROUP BY "+groupBy : ""), 
                     function(err, rows){if (err) reject(err); else resolve(rows)}
                 );

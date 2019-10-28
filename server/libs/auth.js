@@ -34,7 +34,7 @@ module.exports = function (passport) {
         usernameField: 'email',
         passwordField: 'password'
       }, (uEmail, uPassword, done) => {
-        db.findUsersByParameters({ mail: uEmail }).then((user) => {
+        db.findUserByParameters({ mail: uEmail }).then((user) => {
           if (user) {
             return db.util.user.validatePassword(uPassword, user.password).then(() => {
               return done(null, user) || true
