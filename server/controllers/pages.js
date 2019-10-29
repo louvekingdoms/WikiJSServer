@@ -19,7 +19,7 @@ router.get('/edit/*', (req, res, next) => {
   if (!res.locals.rights.write) {
     return res.render('error-forbidden')
   }
-
+  
   let safePath = entryHelper.parsePath(_.replace(req.path, '/edit', ''))
   res.locals.pageTitle = "E:"+makeTitle(safePath);
 
@@ -31,6 +31,8 @@ router.get('/edit/*', (req, res, next) => {
     includeParentInfo: false,
     cache: false
   }).then((pageData) => {
+      console.log("PAGE DATA: ");
+      console.log(pageData);
     if (pageData) {
       res.render('pages/edit', { pageData })
     } else {

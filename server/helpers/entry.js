@@ -15,15 +15,11 @@ module.exports = {
   parsePath (urlPath) {
     urlPath = qs.unescape(urlPath)
     let wlist = new RegExp('[^a-z0-9' + appdata.regex.cjk + appdata.regex.arabic + '/-]', 'g')
-
     urlPath = _.toLower(urlPath).replace(wlist, '')
-
     if (urlPath === '/') {
       urlPath = 'home'
     }
-
     let urlParts = _.filter(_.split(urlPath, '/'), (p) => { return !_.isEmpty(p) })
-
     return _.join(urlParts, '/')
   },
 

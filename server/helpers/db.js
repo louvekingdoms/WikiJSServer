@@ -9,6 +9,12 @@ function trace(a, t=""){
     w.info("[SQL "+t.toUpperCase()+"] "+a.join(", "));
 }
 
+function quoteIfNotString(a){
+    return ((
+        isNaN(a) || (a == null) || (a === '')
+    ) ? "'"+a+"'" : a)+"";
+}
+
 module.exports = () => {
     const fs = require('fs');
     const sqlite3 = require('sqlite3').verbose();
@@ -98,7 +104,7 @@ module.exports = () => {
             let assigns = [];
             for (k in data){
                 if (k === column) return;
-                assigns.push("`"+k+"`="+(isNaN(data[k]) ? "'"+data[k]+"'" : data[k])+"");
+                assigns.push("`"+k+"`="+quoteIfNotString(data[k]));
             }
             return new Promise(function (resolve, reject){
                 database.run("UPDATE `"+tableName+"` SET ("+assigns.join(", ")+") WHERE "+column+" = ?", data[column], function(err){if (err) reject(err); else resolve()});
@@ -113,7 +119,7 @@ module.exports = () => {
             let values = [];
             for (k in data){
                 rows.push(k);
-                values.push(isNaN(data[k]) ? "'"+data[k]+"'" : data[k]);
+                values.push(quoteIfNotString(data[k]));
             }
             return new Promise(function (resolve, reject){
                 database.run("INSERT INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ("+values.join(", ")+")", function(err){if (err) reject(err); else resolve()});
@@ -128,7 +134,7 @@ module.exports = () => {
             let values = [];
             for (k in data){
                 rows.push(k);
-                values.push(isNaN(data[k]) ? "'"+data[k]+"'" : data[k]);
+                values.push(quoteIfNotString(data[k]));
             }
             return new Promise(function (resolve, reject){
                 database.run("REPLACE INTO `"+tableName+"` (`"+rows.join('`, `')+"`) VALUES ("+values.join(", ")+")", function(err){if (err) reject(err); else resolve()});
@@ -161,7 +167,7 @@ module.exports = () => {
             let equalities = [];
             if (parameters){
                 for (k in parameters){
-                    equalities.push(k+" = "+(isNaN(parameters[k]) ? "'"+parameters[k]+"'" : parameters[k]));
+                    equalities.push(k+" = "+quoteIfNotString(parameters[k]));
                 }
             }
             return new Promise(function (resolve, reject){
@@ -177,14 +183,14 @@ module.exports = () => {
             let equalities = [];
             if (parameters){
                 for (k in parameters){
-                    equalities.push(k+" = "+(isNaN(parameters[k]) ? "'"+parameters[k]+"'" : parameters[k]));
+                    equalities.push(k+" = "+quoteIfNotString(parameters[k]));
                 }
             }
             return new Promise(function (resolve, reject){
                 database.all(
                     "SELECT * FROM `"+tableName+"`" 
-                    + (parameters ? "WHERE "+equalities.join(" AND ") : "")
-                    + (groupBy ? "GROUP BY "+groupBy : ""), 
+                    + (parameters ? " WHERE "+equalities.join(" AND ") : "")
+                    + (groupBy ? " GROUP BY "+groupBy : ""), 
                     function(err, rows){if (err) reject(err); else resolve(rows)}
                 );
             });

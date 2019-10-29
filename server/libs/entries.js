@@ -51,8 +51,12 @@ module.exports = {
       includeChildrenInfo: false,
       cache: false
     }).then(() => {
+      console.log("FETCHED ORIG: ");
+      console.log(pageData);
       return true
     }).catch((err) => { // eslint-disable-line handle-callback-err
+      console.log("ERR: ");
+      console.log(err);
       return false
     })
   },
@@ -127,7 +131,6 @@ module.exports = {
           let htmlProcessor = (options.parseMarkdown) ? mark.parseContent(contents) : Promise.resolve('')
 
           // Parse contents
-
           return htmlProcessor.then(html => {
             let pageData = {
               markdown: (options.includeMarkdown) ? contents : '',
@@ -143,13 +146,11 @@ module.exports = {
             pageData.meta.path = entryPath
 
             // Get parent
-
             let parentPromise = (options.includeParentInfo) ? self.getParentInfo(entryPath).then((parentData) => {
               return (pageData.parent = parentData)
             }).catch((err) => { // eslint-disable-line handle-callback-err
               return (pageData.parent = false)
             }) : Promise.resolve(true)
-            
             
             // Get children
             let childrenPromise = (options.includeChildrenInfo) ? self.getChildrenInfo(entryPath).then((children) => {
@@ -159,7 +160,6 @@ module.exports = {
             }).catch((err) => { // eslint-disable-line handle-callback-err
               return (pageData.children = false)
             }) : Promise.resolve(true)
-
             return parentPromise.then(() => {
                 return childrenPromise.then(() => {
                   // Cache to disk
@@ -172,9 +172,9 @@ module.exports = {
                       return true
                     })
                   } else {
-                    return true
+                    return Promise.resolve(true);
                   }
-                }).return(pageData);
+                }).then(function(){ return(pageData)});
             })
           })
         })
@@ -182,6 +182,7 @@ module.exports = {
         return false
       }
     }).catch((err) => { // eslint-disable-line handle-callback-err
+      winston.error(err);
       throw new Promise.OperationalError(lang.t('errors:notexist', { path: entryPath }))
     })
   },
@@ -230,7 +231,7 @@ module.exports = {
         let children = [];
           
         for (let k in pages){
-            const fpath = entryHelper.getFullPath(pages[k].id)
+            const fpath = entryHelper.getFullPath(pages[k].path)
 
             const st = fs.statSync(fpath);
             if (st.isFile()) {
@@ -238,7 +239,7 @@ module.exports = {
                 const contents = fs.readFileSync(fpath, 'utf8');
                 let pageMeta = mark.parseMeta(contents);
                 children.push({
-                  path: pages[k].id,
+                  path: pages[k].path,
                   title: (pageMeta.title) ? pageMeta.title : _.startCase(parentFile),
                   subtitle: (pageMeta.subtitle) ? pageMeta.subtitle : false
                 });
@@ -325,10 +326,11 @@ module.exports = {
         isDirectory: false,
         isEntry: true
       }) /// :x should not be async!!
-      .then(async function(result) {
-        let plainResult = await db.findEntryByParentPath(parentPath)
-        plainResult.text = content.text
-        return plainResult
+      .then(function(result) {
+        return db.findEntryByParentPath(parentPath).then((plainResult) =>{
+            plainResult.text = content.text
+            return plainResult
+        });
       })
     }).then(result => {
       return self.updateTreeInfo().then(() => {
@@ -349,21 +351,15 @@ module.exports = {
     return db.getEntriesGroupedBy("parentPath").then(allPaths => {
       let paths = [];
       for(k in allPaths){
-        if (allPaths[k].parentPath != "") paths.push(allPaths[k]);
+        if (allPaths[k].parentPath !== "") paths.push(allPaths[k]);
       }
-        // Remove null parentPath
       if (paths.length > 0) {
         return Promise.map(paths, pathItem => {
-          let parentPath = _.chain(pathItem).split('/').initial().join('/').value()
-          let guessedTitle = _.chain(pathItem).split('/').last().startCase().value()
-          let newEntry = {
-              id : pathItem.id,
-              isDirectory : true,
-              isEntry : false,
-              title : guessedtitle,
-              parentPath : parentPath
-          }
-          return db.updateOrInsertEntry(newEntry);
+          let parentPath = _.chain(pathItem.parentPath).split('/').initial().join('/').value()
+          let guessedTitle = _.chain(pathItem.parentPath).split('/').last().startCase().value()
+          pathItem.isDirectory = true,
+          pathItem.isEntry = false
+          return db.updateOrInsertEntry(pathItem);
         });
       } else {
         return true

@@ -48,6 +48,9 @@ module.exports = {
    * @return     {object}  List of permissions for this request
    */
   check (req) {
+    //TODO: Reimplement
+    if (req.user) return {read: true, write:true, manage:true};
+    
     let self = this
 
     let perm = {

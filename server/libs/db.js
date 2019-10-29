@@ -93,12 +93,14 @@ module.exports = {
   // Updates entry row
   // entry: {}
   updateEntry : function(entry){
+    if (!entry.path) console.trace(entry);
     return db.update("entry", entry);
   },
   
   // Updates or inserts entry row
   // entry: {}
   updateOrInsertEntry : function(entry){
+    if (!entry.path) console.trace(entry);
     return db.replace("entry", entry);
   },
   

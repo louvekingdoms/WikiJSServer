@@ -29,6 +29,7 @@ global.appdata = appconf.data
 // ----------------------------------------
 
 global.winston = require('./libs/logger')(IS_DEBUG, 'SERVER')
+global.winston.info('========================================')
 global.winston.info('Wiki.js is initializing...')
 
 // ----------------------------------------
