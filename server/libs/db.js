@@ -142,6 +142,10 @@ module.exports = {
     return db.truncate("uplfile");
   },
   
+  deleteAllEntries: function (){
+    return db.truncate("entry");
+  },
+  
   // Add multiple folders to the uplfolder table
   // folders: str[]
   createMultipleUplFolders: function(folders){

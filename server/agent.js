@@ -75,7 +75,14 @@ let job
 let jobIsBusy = false
 let jobUplWatchStarted = false
 
-global.db.onReady.then(() => {
+global.db.onReady
+.then(() => {
+   return db.deleteAllEntries()
+})
+.then(() => {
+    return global.git.onReady;
+})
+.then(() => {
   job = new Cron({
     cronTime: '0 */5 * * * *',
     onTick: () => {
@@ -102,7 +109,7 @@ global.db.onReady.then(() => {
       //* ****************************************
       // -> Sync with Git remote
       //* ****************************************
-
+      
       jobs.push(global.git.resync().then(() => {
         // -> Stream all documents
 
