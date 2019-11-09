@@ -31,8 +31,6 @@ router.get('/edit/*', (req, res, next) => {
     includeParentInfo: false,
     cache: false
   }).then((pageData) => {
-      console.log("PAGE DATA: ");
-      console.log(pageData);
     if (pageData) {
       res.render('pages/edit', { pageData })
     } else {
