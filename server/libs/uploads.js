@@ -48,7 +48,7 @@ module.exports = {
    * @return     {Array<String>}  The uploads folders.
    */
   getUploadsFolders () {
-    return db.UplFolder.find({}, 'name').sort('name').exec().then((results) => {
+    return db.getUplFolders().then((results) => {
       return (results) ? _.map(results, 'name') : [{ name: '' }]
     })
   },
@@ -109,10 +109,10 @@ module.exports = {
    * @return     {Array<Object>}  The files matching the query
    */
   getUploadsFiles (cat, fld) {	  
-    const files = db.UplFile.find({
+    const files = db.findUplFileByParameters({
       category: cat,
       folder: 'f:' + fld
-    }).sort('filename').exec()
+    })
 	return files;
   },
 

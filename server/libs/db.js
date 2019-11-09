@@ -84,6 +84,10 @@ module.exports = {
     return db.get("uplfolder", name);
   },
   
+  getUplFolders : function(){
+    return db.findAll("uplfolder");  
+  },
+  
   // Updates or inserts upl folder
   // folder: {}
   updateOrInsertUplFolder : function(folder){
@@ -120,6 +124,12 @@ module.exports = {
   // parameters = {}
   findEntryByParameters: function(parameters){
     return db.find("entry", parameters);
+  },
+  
+  // Finds a single uplfile per object similarity
+  // parameters = {}
+  findUplFileByParameters: function(parameters){
+    return db.find("uplfile", parameters);
   },
   
   deleteEntryByPath: function (path){
