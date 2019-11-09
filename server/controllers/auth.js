@@ -13,15 +13,19 @@ const fs = require('fs');
  * Login form
  */
 router.get('/login', function (req, res, next) {
-  const bgFiles = fs.readdirSync(git.getRepoPath()+"/backgrounds");
+  let bgFiles = [];
   let backgrounds = [];
+  
+  try{
+    backgrounds =  fs.readdirSync(git.getRepoPath()+"/backgrounds");
+  }
+  catch(e){} // No big deal if there is no background
   
   for (let k in bgFiles){
     const fullPath = git.getRepoPath()+"/backgrounds/"+bgFiles[k];
     if (fs.lstatSync(fullPath).isDirectory()) continue;
-    backgrounds.push(new Buffer(fs.readFileSync(fullPath)).toString('base64'))
+    backgrounds.push(bgFiles[k])
   }
-  
   
   res.render('auth/login', {
     usr: res.locals.usr,

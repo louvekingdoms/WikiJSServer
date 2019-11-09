@@ -167,6 +167,7 @@ app.use(mw.flash)
 
 app.use('/', ctrl.auth)
 
+app.use('/backgrounds', mw.auth, ctrl.backgrounds)
 app.use('/uploads', mw.auth, ctrl.uploads)
 app.use('/admin', mw.auth, ctrl.admin)
 app.use('/', mw.auth, ctrl.pages)

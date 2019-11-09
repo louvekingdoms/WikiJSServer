@@ -24,7 +24,7 @@ html(data-logic='login')
   body
     #bg
       each bg in backgrounds
-        div(style='background-image:url("data:image/jpg;base64, '+bg+'");')
+        div(style='background-image:url("backgrounds/'+bg+'");')
     #root
       h1= appconfig.title
       h2= t('auth:loginrequired')
@@ -48,36 +48,16 @@ html(data-logic='login')
             button.ms(onclick='window.location.assign("/login/ms")')
               i.icon-windows2
               span= t('auth:providers.windowslive')
-          if appconfig.auth.azure && appconfig.auth.azure.enabled
-            button.ms(onclick='window.location.assign("/login/azure")')
-              i.icon-windows2
-              span= t('auth:providers.azure')
-          if appconfig.auth.google && appconfig.auth.google.enabled
-            button.google(onclick='window.location.assign("/login/google")')
-              i.icon-google
-              span= t('auth:providers.google')
-          if appconfig.auth.facebook && appconfig.auth.facebook.enabled
-            button.facebook(onclick='window.location.assign("/login/facebook")')
-              i.icon-facebook
-              span= t('auth:providers.facebook')
           if appconfig.auth.github && appconfig.auth.github.enabled
             button.github(onclick='window.location.assign("/login/github")')
               i.icon-github
               span= t('auth:providers.github')
-          if appconfig.auth.slack && appconfig.auth.slack.enabled
-            button.slack(onclick='window.location.assign("/login/slack")')
-              i.icon-slack
-              span= t('auth:providers.slack')
           if appconfig.auth.oauth2 && appconfig.auth.oauth2.enabled
             button.slack(onclick='window.location.assign("/login/oauth2")')
               i.icon-box
               span= t('auth:providers.oauth2')
-          if appconfig.auth.oidc && appconfig.auth.oidc.enabled
-            button.slack(onclick='window.location.assign("/login/oidc")')
-              i.icon-box
-              span= t('auth:providers.oidc')
     #copyright
       = t('footer.poweredby') + ' '
-      a.icon(href='https://github.com/Requarks/wiki')
+      a.icon(href='https://github.com/louvekingdoms/WikiJSServer')
         i.icon-github
-      a(href='https://wiki.requarks.io/') Wiki.js
+        |  WikiJS
