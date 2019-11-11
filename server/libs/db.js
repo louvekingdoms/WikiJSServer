@@ -132,6 +132,10 @@ module.exports = {
     return db.find("uplfile", parameters);
   },
   
+  findUplFilesByParameters: function(parameters){
+    return db.findAll("uplfile", false, parameters);  
+  },
+  
   deleteEntryByPath: function (path){
     return db.remove("entry", path, "path");
   },

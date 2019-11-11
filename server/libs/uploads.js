@@ -109,7 +109,7 @@ module.exports = {
    * @return     {Array<Object>}  The files matching the query
    */
   getUploadsFiles (cat, fld) {	  
-    const files = db.findUplFileByParameters({
+    const files = db.findUplFilesByParameters({
       category: cat,
       folder: 'f:' + fld
     })
