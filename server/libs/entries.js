@@ -496,9 +496,13 @@ module.exports = {
   getFromTree(basePath, usr) {
       // TODO: Reimplement sorting
     return db.findEntriesByParentPath(basePath).then(results => {
+      return results;
+      // TODO: reimplement hidden pages based on role
+      /*
       return _.filter(results, r => {
         return rights.checkRole('/' + r.path, usr.rights, 'read')
       })
+      */
     })
   },
 

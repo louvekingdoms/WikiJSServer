@@ -59,7 +59,7 @@ router.post('/login', function (req, res, next) {
     // LOGIN SUCCESS
     return req.logIn(user, function (err) {
       if (err) { return next(err) }
-      return res.redirect(req.session.redirectTo || '/')
+      return res.redirect('/')
     }) || true
   }).catch(err => {
     // LOGIN FAIL
