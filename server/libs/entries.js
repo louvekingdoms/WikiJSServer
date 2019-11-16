@@ -51,8 +51,6 @@ module.exports = {
       includeChildrenInfo: false,
       cache: false
     }).then(() => {
-      console.log("FETCHED ORIG: ");
-      console.log(pageData);
       return true
     }).catch((err) => { // eslint-disable-line handle-callback-err
       console.log("ERR: ");

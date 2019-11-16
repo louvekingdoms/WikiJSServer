@@ -39,7 +39,6 @@ router.get('/t/*', (req, res, next) => {
 
 router.post('/img', lcdata.uploadImgHandler, (req, res, next) => {	  	
   let destFolder = _.chain(req.body.folder).trim().toLower().value()
-
   upl.validateUploadsFolder(destFolder).then((destFolderPath) => {
     if (!destFolderPath) {
       res.json({ ok: false, msg: lang.t('errors:invalidfolder') })
@@ -65,7 +64,6 @@ router.post('/img', lcdata.uploadImgHandler, (req, res, next) => {
         return true
       }).then(() => {
         // -> Move file to final destination
-
         return fs.moveAsync(f.path, destFilePath, { clobber: false })
       }).then(() => {
         return {
@@ -85,6 +83,7 @@ router.post('/img', lcdata.uploadImgHandler, (req, res, next) => {
           }
         }
       })
+      
       res.json({ ok: true, results: uplResults })
       return true
     }).catch((err) => {

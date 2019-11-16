@@ -252,6 +252,10 @@ module.exports = (port, spinner) => {
        "password": await bcrypt.hash(req.body.adminPassword)
     });
     
+    await db.insert("uplfolder", {
+       "name": ""
+    });
+    
     db.close();
     
     Promise.join(

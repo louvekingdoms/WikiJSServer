@@ -191,7 +191,16 @@ module.exports = () => {
                     "SELECT * FROM `"+tableName+"`" 
                     + (parameters ? " WHERE "+equalities.join(" AND ") : "")
                     + (groupBy ? " GROUP BY "+groupBy : ""), 
-                    function(err, rows){if (err) reject(err); else resolve(rows)}
+                    function(err, rows){
+                        if (err){
+                            console.trace("ERR");
+                            console.log(err);
+                            reject(err); 
+                        }
+                        else {
+                            resolve(rows)
+                        }
+                    }
                 );
             });
         },

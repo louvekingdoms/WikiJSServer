@@ -81,7 +81,7 @@ module.exports = {
   // Finds uplfolder by folder name
   // name: str
   findUplFolderByName : function(name){
-    return db.get("uplfolder", name);
+    return db.get("uplfolder", name, "name");
   },
   
   getUplFolders : function(){
@@ -167,7 +167,6 @@ module.exports = {
     let promises = [];
     for (let k in folders){
         const name = folders[k];
-        if (!name) continue;
         promises.push(db.insert("uplfolder", {name: name}));
     }
     return Promise.all(promises);
