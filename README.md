@@ -1,6 +1,7 @@
 <div align="center">
-##### A modern, lightweight and powerful wiki app built on NodeJS, Git and Markdown
-### except I butchered it to make it work more like I wanted
+  
+### A modern, lightweight and powerful wiki app built on NodeJS, Git and Markdown
+#####  except I butchered it to make it work more like I wanted
 
 </div>
 
