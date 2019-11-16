@@ -54,7 +54,8 @@ module.exports = (port, spinner) => {
   // Controllers
   // ----------------------------------------
 
-  app.get('*', (req, res) => {
+  app.get('*', async function(req, res) {
+      
     let langs = []
     let conf = {}
     try {
@@ -133,39 +134,9 @@ module.exports = (port, spinner) => {
   /**
    * Check the DB connection
    */
-  app.post('/dbcheck', (req, res) => {
-    let mongo = require('mongodb').MongoClient
-    let mongoURI = cfgHelper.parseConfigValue(req.body.db)
-    mongo.connect(mongoURI, {
-      autoReconnect: false,
-      reconnectTries: 2,
-      reconnectInterval: 1000,
-      connectTimeoutMS: 5000,
-      socketTimeoutMS: 5000
-    }, (err, db) => {
-      if (err === null) {
-        // Try to create a test collection
-        db.createCollection('test', (err, results) => {
-          if (err === null) {
-            // Try to drop test collection
-            db.dropCollection('test', (err, results) => {
-              if (err === null) {
-                res.json({ ok: true })
-              } else {
-                res.json({ ok: false, error: 'Unable to delete test collection. Verify permissions. ' + err.message })
-              }
-              db.close()
-            })
-          } else {
-            res.json({ ok: false, error: 'Unable to create test collection. Verify permissions. ' + err.message })
-            db.close()
-          }
-        })
-      } else {
-        res.json({ ok: false, error: err.message })
-      }
+    app.post('/dbcheck', (req, res) => {
+        res.json({ ok: true });
     })
-  })
 
   /**
    * Check the Git connection
@@ -258,63 +229,36 @@ module.exports = (port, spinner) => {
   /**
    * Finalize
    */
-  app.post('/finalize', (req, res) => {
+  app.post('/finalize', async function(req, res) {
     const bcrypt = require('bcryptjs-then')
     const crypto = Promise.promisifyAll(require('crypto'))
-    let mongo = require('mongodb').MongoClient
-    let parsedMongoConStr = cfgHelper.parseConfigValue(req.body.db)
-
+    const db = require('./helpers/db')();
+    
+    await db.open();
+    
+    const models = fs.readdirSync("server/schemas");
+    for (let k in models){
+        const filename = models[k];
+        if (!filename.endsWith(".json")) continue;
+        const tableName = filename.replace(".json", "");
+        const content = require("./schemas/"+tableName);
+        
+        await db.createTableIfNotExists(tableName, content);
+    }
+    
+    await db.insert("users", {
+       "name": "Administrator",
+       "mail": req.body.adminEmail,
+       "password": await bcrypt.hash(req.body.adminPassword)
+    });
+    
+    await db.insert("uplfolder", {
+       "name": ""
+    });
+    
+    db.close();
+    
     Promise.join(
-      new Promise((resolve, reject) => {
-        mongo.connect(parsedMongoConStr, {
-          autoReconnect: false,
-          reconnectTries: 2,
-          reconnectInterval: 1000,
-          connectTimeoutMS: 5000,
-          socketTimeoutMS: 5000
-        }, (err, db) => {
-          if (err === null) {
-            db.createCollection('users', { strict: false }, (err, results) => {
-              if (err === null) {
-                bcrypt.hash(req.body.adminPassword).then(adminPwdHash => {
-                  db.collection('users').findOneAndUpdate({
-                    provider: 'local',
-                    email: req.body.adminEmail
-                  }, {
-                    provider: 'local',
-                    email: req.body.adminEmail,
-                    name: 'Administrator',
-                    password: adminPwdHash,
-                    rights: [{
-                      role: 'admin',
-                      path: '/',
-                      exact: false,
-                      deny: false
-                    }],
-                    updatedAt: new Date(),
-                    createdAt: new Date()
-                  }, {
-                    upsert: true,
-                    returnOriginal: false
-                  }, (err, results) => {
-                    if (err === null) {
-                      resolve(true)
-                    } else {
-                      reject(err)
-                    }
-                    db.close()
-                  })
-                })
-              } else {
-                reject(err)
-                db.close()
-              }
-            })
-          } else {
-            reject(err)
-          }
-        })
-      }),
       fs.readFileAsync(path.join(ROOTPATH, 'config.yml'), 'utf8').then(confRaw => {
         let conf = yaml.safeLoad(confRaw)
         conf.title = req.body.title

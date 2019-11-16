@@ -6,44 +6,26 @@ const Promise = require('bluebird')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
-const ExpressBrute = require('express-brute')
-const ExpressBruteMongooseStore = require('express-brute-mongoose')
 const moment = require('moment')
 const fs = require('fs');
-
-/**
- * Setup Express-Brute
- */
-const EBstore = new ExpressBruteMongooseStore(db.Bruteforce)
-const bruteforce = new ExpressBrute(EBstore, {
-  freeRetries: 5,
-  minWait: 60 * 1000,
-  maxWait: 5 * 60 * 1000,
-  refreshTimeoutOnRequest: false,
-  failCallback (req, res, next, nextValidRequestDate) {
-    req.flash('alert', {
-      class: 'error',
-      title: lang.t('auth:errors.toomanyattempts'),
-      message: lang.t('auth:errors.toomanyattemptsmsg', { time: moment(nextValidRequestDate).fromNow() }),
-      iconClass: 'fa-times'
-    })
-    res.redirect('/login')
-  }
-})
 
 /**
  * Login form
  */
 router.get('/login', function (req, res, next) {
-  const bgFiles = fs.readdirSync(git.getRepoPath()+"/backgrounds");
+  let bgFiles = [];
   let backgrounds = [];
+  
+  try{
+    backgrounds =  fs.readdirSync(git.getRepoPath()+"/backgrounds");
+  }
+  catch(e){} // No big deal if there is no background
   
   for (let k in bgFiles){
     const fullPath = git.getRepoPath()+"/backgrounds/"+bgFiles[k];
     if (fs.lstatSync(fullPath).isDirectory()) continue;
-    backgrounds.push(new Buffer(fs.readFileSync(fullPath)).toString('base64'))
+    backgrounds.push(bgFiles[k])
   }
-  
   
   res.render('auth/login', {
     usr: res.locals.usr,
@@ -51,7 +33,7 @@ router.get('/login', function (req, res, next) {
   })
 })
 
-router.post('/login', bruteforce.prevent, function (req, res, next) {
+router.post('/login', function (req, res, next) {
   new Promise((resolve, reject) => {
     // [1] LOCAL AUTHENTICATION
     passport.authenticate('local', function (err, user, info) {
@@ -77,9 +59,7 @@ router.post('/login', bruteforce.prevent, function (req, res, next) {
     // LOGIN SUCCESS
     return req.logIn(user, function (err) {
       if (err) { return next(err) }
-      req.brute.reset(function () {
-        return res.redirect(req.session.redirectTo || '/')
-      })
+      return res.redirect('/')
     }) || true
   }).catch(err => {
     // LOGIN FAIL

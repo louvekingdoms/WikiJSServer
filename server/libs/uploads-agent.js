@@ -60,9 +60,7 @@ module.exports = {
       let pInfo = self.parseUploadsRelPath(p)
       return self.processFile(pInfo.folder, pInfo.filename)
 	  .then((mData) => {
-		const id = mData._id;
-		delete mData._id;
-        return db.UplFile.findByIdAndUpdate(id, mData, { upsert: true })
+        return db.updateOrInsertUplFile(mData)
       })
 	  .then(() => {
         return git.commitUploads(lang.t('git:uploaded', { path: p }))
@@ -92,16 +90,10 @@ module.exports = {
       }).filter((s) => { return s.stat.isDirectory() }).then((arrDirs) => {
         let folderNames = _.map(arrDirs, 'filename')
         folderNames.unshift('')
-
+        
         // Add folders to DB
-
-        return db.UplFolder.remove({}).then(() => {
-          return db.UplFolder.insertMany(_.map(folderNames, (f) => {
-            return {
-              _id: 'f:' + f,
-              name: f
-            }
-          }))
+        return db.deleteAllUplFolders().then(() => {
+          return db.createMultipleUplFolders(folderNames)
         }).then(() => {
           // Travel each directory and scan files
 
@@ -122,9 +114,9 @@ module.exports = {
           }, {concurrency: 1}).finally(() => {
             // Add files to DB
 
-            return db.UplFile.remove({}).then(() => {
+            return db.deleteAllUplFiles().then(() => {
               if (_.isArray(allFiles) && allFiles.length > 0) {
-                return db.UplFile.insertMany(allFiles)
+                return db.createMultipleUplFiles(allFiles)
               } else {
                 return true
               }
@@ -189,10 +181,10 @@ module.exports = {
             let cacheThumbnailPathStr = path.format(cacheThumbnailPath)
 
             let mData = {
-              _id: fUid,
+              uid: fUid,
               category: 'image',
               mime: mimeInfo.mime,
-              extra: mImgSize,
+              extra: JSON.stringify(mImgSize),
               folder: 'f:' + fldName,
               filename: f,
               basename: fPathObj.name,
@@ -219,7 +211,7 @@ module.exports = {
       // Other Files
 
       return {
-        _id: fUid,
+        id: fUid,
         category: 'binary',
         mime: mimeInfo.mime,
         folder: 'f:' + fldName,

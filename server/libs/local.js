@@ -104,10 +104,12 @@ module.exports = {
 
     try {
       fs.ensureDirSync(path.resolve(ROOTPATH, appconfig.paths.data))
-      fs.emptyDirSync(path.resolve(ROOTPATH, appconfig.paths.data))
       fs.ensureDirSync(path.resolve(ROOTPATH, appconfig.paths.data, './cache'))
       fs.ensureDirSync(path.resolve(ROOTPATH, appconfig.paths.data, './thumbs'))
       fs.ensureDirSync(path.resolve(ROOTPATH, appconfig.paths.data, './temp-upload'))
+      fs.emptyDirSync(path.resolve(ROOTPATH, appconfig.paths.data + '/cache'))
+      fs.emptyDirSync(path.resolve(ROOTPATH, appconfig.paths.data + '/thumbs'))
+      fs.emptyDirSync(path.resolve(ROOTPATH, appconfig.paths.data + '/temp-upload'))
 
       if (os.type() !== 'Windows_NT') {
         fs.chmodSync(path.resolve(ROOTPATH, appconfig.paths.data, './temp-upload'), '755')

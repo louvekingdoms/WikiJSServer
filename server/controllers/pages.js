@@ -19,7 +19,7 @@ router.get('/edit/*', (req, res, next) => {
   if (!res.locals.rights.write) {
     return res.render('error-forbidden')
   }
-
+  
   let safePath = entryHelper.parsePath(_.replace(req.path, '/edit', ''))
   res.locals.pageTitle = "E:"+makeTitle(safePath);
 

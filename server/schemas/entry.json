@@ -1,0 +1,9 @@
+[
+    "path TEXT NOT NULL UNIQUE",
+    "title TEXT NOT NULL",
+    "subtitle TEXT DEFAULT NULL",
+    "parentTitle TEXT DEFAULT NULL",
+    "parentPath TEXT DEFAULT NULL",
+    "isDirectory BOOLEAN",
+    "isEntry BOOLEAN"
+]

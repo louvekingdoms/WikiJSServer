@@ -36,7 +36,6 @@ defaults:
         enabled: false
       azure:
         enabled: false
-    db: mongodb://localhost/wiki
     sessionSecret: null
     admin: null
     git:

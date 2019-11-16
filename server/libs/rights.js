@@ -11,7 +11,7 @@ module.exports = {
 
   guest: {
     provider: 'local',
-    email: 'guest',
+    mail: 'guest',
     name: 'Guest',
     password: '',
     rights: [
@@ -33,7 +33,7 @@ module.exports = {
     let self = this
 
     db.onReady.then(() => {
-      db.User.findOne({ provider: 'local', email: 'guest' }).then((u) => {
+      db.findUserByParameters({mail: 'guest' }).then((u) => {
         if (u) {
           self.guest = u
         }
@@ -48,6 +48,9 @@ module.exports = {
    * @return     {object}  List of permissions for this request
    */
   check (req) {
+    //TODO: Reimplement
+    if (req.user) return {read: true, write:true, manage:true};
+    
     let self = this
 
     let perm = {

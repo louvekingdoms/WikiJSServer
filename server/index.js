@@ -29,6 +29,7 @@ global.appdata = appconf.data
 // ----------------------------------------
 
 global.winston = require('./libs/logger')(IS_DEBUG, 'SERVER')
+global.winston.info('========================================')
 global.winston.info('Wiki.js is initializing...')
 
 // ----------------------------------------
@@ -38,7 +39,7 @@ global.winston.info('Wiki.js is initializing...')
 global.lcdata = require('./libs/local').init()
 global.db = require('./libs/db').init()
 global.entries = require('./libs/entries').init()
-global.git = require('./libs/git').init(false)
+global.git = require('./libs/git').init()
 global.lang = require('i18next')
 global.mark = require('./libs/markdown')
 global.search = require('./libs/search').init()
@@ -61,7 +62,7 @@ const i18nBackend = require('i18next-node-fs-backend')
 const passport = require('passport')
 const passportSocketIo = require('passport.socketio')
 const session = require('express-session')
-const SessionMongoStore = require('connect-mongo')(session)
+const SQLiteStore = require('connect-sqlite3')(session);
 const graceful = require('node-graceful')
 const socketio = require('socket.io')
 
@@ -100,10 +101,7 @@ require('./libs/auth')(passport)
 global.rights = require('./libs/rights')
 global.rights.init()
 
-let sessionStore = new SessionMongoStore({
-  mongooseConnection: global.db.connection,
-  touchAfter: 15
-})
+let sessionStore = new SQLiteStore
 
 app.use(cookieParser())
 app.use(session({
@@ -169,6 +167,7 @@ app.use(mw.flash)
 
 app.use('/', ctrl.auth)
 
+app.use('/backgrounds', mw.auth, ctrl.backgrounds)
 app.use('/uploads', mw.auth, ctrl.uploads)
 app.use('/admin', mw.auth, ctrl.admin)
 app.use('/', mw.auth, ctrl.pages)

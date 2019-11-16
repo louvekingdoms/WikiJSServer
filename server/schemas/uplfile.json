@@ -1,0 +1,12 @@
+[
+    "uid TEXT NOT NULL UNIQUE",
+    "category TEXT NOT NULL DEFAULT 'binary'",
+    "mime TEXT NOT NULL DEFAULT 'application/octet-stream'",
+    "extra TEXT DEFAULT NULL",
+    "folder TEXT NOT NULL",
+    "filename TEXT NOT NULL",
+    "basename TEXT NOT NULL",
+    "filesize NUMBER",
+    
+    "FOREIGN KEY (folder) REFERENCES uplfolder(name)"
+]

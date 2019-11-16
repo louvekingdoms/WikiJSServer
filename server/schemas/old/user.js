@@ -49,6 +49,7 @@ var userSchema = Mongoose.Schema({
 userSchema.statics.processProfile = (profile) => {
   let primaryEmail = ''
   let name = ''
+  // Shenanigans to get email and name accross all services whatever their API sends
   if (_.isArray(profile.emails)) {
     let e = _.find(profile.emails, ['primary', true])
     primaryEmail = (e) ? e.value : _.first(profile.emails).value
@@ -67,6 +68,7 @@ userSchema.statics.processProfile = (profile) => {
   profile.provider = _.lowerCase(profile.provider)
   primaryEmail = _.toLower(primaryEmail)
 
+  // Same for name
   if (_.has(profile, 'displayName')) {
     name = profile.displayName
   } else if (_.has(profile, 'name')) {

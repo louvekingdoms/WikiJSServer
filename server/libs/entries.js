@@ -53,6 +53,8 @@ module.exports = {
     }).then(() => {
       return true
     }).catch((err) => { // eslint-disable-line handle-callback-err
+      console.log("ERR: ");
+      console.log(err);
       return false
     })
   },
@@ -127,7 +129,6 @@ module.exports = {
           let htmlProcessor = (options.parseMarkdown) ? mark.parseContent(contents) : Promise.resolve('')
 
           // Parse contents
-
           return htmlProcessor.then(html => {
             let pageData = {
               markdown: (options.includeMarkdown) ? contents : '',
@@ -143,13 +144,11 @@ module.exports = {
             pageData.meta.path = entryPath
 
             // Get parent
-
             let parentPromise = (options.includeParentInfo) ? self.getParentInfo(entryPath).then((parentData) => {
               return (pageData.parent = parentData)
             }).catch((err) => { // eslint-disable-line handle-callback-err
               return (pageData.parent = false)
             }) : Promise.resolve(true)
-            
             
             // Get children
             let childrenPromise = (options.includeChildrenInfo) ? self.getChildrenInfo(entryPath).then((children) => {
@@ -159,7 +158,6 @@ module.exports = {
             }).catch((err) => { // eslint-disable-line handle-callback-err
               return (pageData.children = false)
             }) : Promise.resolve(true)
-
             return parentPromise.then(() => {
                 return childrenPromise.then(() => {
                   // Cache to disk
@@ -172,9 +170,9 @@ module.exports = {
                       return true
                     })
                   } else {
-                    return true
+                    return Promise.resolve(true);
                   }
-                }).return(pageData);
+                }).then(function(){ return(pageData)});
             })
           })
         })
@@ -182,6 +180,7 @@ module.exports = {
         return false
       }
     }).catch((err) => { // eslint-disable-line handle-callback-err
+      winston.error(err);
       throw new Promise.OperationalError(lang.t('errors:notexist', { path: entryPath }))
     })
   },
@@ -226,11 +225,11 @@ module.exports = {
    * @return     {Promise<Object|False>}  The children information.
    */
   getChildrenInfo(entryPath) {
-    return db.Entry.find({parentPath: entryPath }).then(pages => {
+    return db.findEntriesByParentPath(entryPath).then(pages => {
         let children = [];
           
         for (let k in pages){
-            const fpath = entryHelper.getFullPath(pages[k]._id)
+            const fpath = entryHelper.getFullPath(pages[k].path)
 
             const st = fs.statSync(fpath);
             if (st.isFile()) {
@@ -238,7 +237,7 @@ module.exports = {
                 const contents = fs.readFileSync(fpath, 'utf8');
                 let pageMeta = mark.parseMeta(contents);
                 children.push({
-                  path: pages[k]._id,
+                  path: pages[k].path,
                   title: (pageMeta.title) ? pageMeta.title : _.startCase(parentFile),
                   subtitle: (pageMeta.subtitle) ? pageMeta.subtitle : false
                 });
@@ -316,22 +315,20 @@ module.exports = {
       return err
     }).then((content) => {
       let parentPath = _.chain(content.entryPath).split('/').initial().join('/').value()
-      return db.Entry.findOneAndUpdate({
-        _id: content.entryPath
-      }, {
+      return db.updateOrInsertEntry({
+        path: content.entryPath,
         title: content.meta.title || content.entryPath,
         subtitle: content.meta.subtitle || '',
         parentTitle: content.parent.title || '',
         parentPath: parentPath,
         isDirectory: false,
         isEntry: true
-      }, {
-        new: true,
-        upsert: true
-      }).then(result => {
-        let plainResult = result.toObject()
-        plainResult.text = content.text
-        return plainResult
+      }) /// :x should not be async!!
+      .then(function(result) {
+        return db.findEntryByParentPath(parentPath).then((plainResult) =>{
+            plainResult.text = content.text
+            return plainResult
+        });
       })
     }).then(result => {
       return self.updateTreeInfo().then(() => {
@@ -349,16 +346,19 @@ module.exports = {
    * @returns {Promise<Boolean>} Promise of the operation
    */
   updateTreeInfo() {
-    return db.Entry.distinct('parentPath', { parentPath: { $ne: '' } }).then(allPaths => {
-      if (allPaths.length > 0) {
-        return Promise.map(allPaths, pathItem => {
-          let parentPath = _.chain(pathItem).split('/').initial().join('/').value()
-          let guessedTitle = _.chain(pathItem).split('/').last().startCase().value()
-          return db.Entry.update({ _id: pathItem }, {
-            $set: { isDirectory: true },
-            $setOnInsert: { isEntry: false, title: guessedTitle, parentPath }
-          }, { upsert: true })
-        })
+    return db.getEntriesGroupedBy("parentPath").then(allPaths => {
+      let paths = [];
+      for(k in allPaths){
+        if (allPaths[k].parentPath !== "") paths.push(allPaths[k]);
+      }
+      if (paths.length > 0) {
+        return Promise.map(paths, pathItem => {
+          let parentPath = _.chain(pathItem.parentPath).split('/').initial().join('/').value()
+          let guessedTitle = _.chain(pathItem.parentPath).split('/').last().startCase().value()
+          pathItem.isDirectory = true,
+          pathItem.isEntry = false
+          return db.updateOrInsertEntry(pathItem);
+        });
       } else {
         return true
       }
@@ -437,7 +437,7 @@ module.exports = {
         // Create cache for new entry
 
         return Promise.join(
-          db.Entry.deleteOne({ _id: entryPath }),
+          db.deleteEntryByPath(entryPath),
           self.updateCache(newEntryPath).then(entry => {
             return search.add(entry)
           })
@@ -468,7 +468,7 @@ module.exports = {
       search.delete(entryPath)
 
       // Delete entry
-      return db.Entry.deleteOne({ _id: entryPath })
+      return db.deleteEntryByPath(entryPath)
     })
   },
 
@@ -494,15 +494,20 @@ module.exports = {
    * @return {Promise<Array>} List of entries
    */
   getFromTree(basePath, usr) {
-    return db.Entry.find({ parentPath: basePath }, 'title parentPath isDirectory isEntry').sort({ title: 'asc' }).then(results => {
+      // TODO: Reimplement sorting
+    return db.findEntriesByParentPath(basePath).then(results => {
+      return results;
+      // TODO: reimplement hidden pages based on role
+      /*
       return _.filter(results, r => {
-        return rights.checkRole('/' + r._id, usr.rights, 'read')
+        return rights.checkRole('/' + r.path, usr.rights, 'read')
       })
+      */
     })
   },
 
   getHistory(entryPath) {
-    return db.Entry.findOne({ _id: entryPath, isEntry: true }).then(entry => {
+    return db.findEntryByParameters({ path: entryPath, isEntry: true }).then(entry => {
       if (!entry) { return false }
       return git.getHistory(entryPath).then(history => {
         return {
