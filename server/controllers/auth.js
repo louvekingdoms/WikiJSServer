@@ -17,12 +17,12 @@ router.get('/login', function (req, res, next) {
   let backgrounds = [];
   
   try{
-    backgrounds =  fs.readdirSync(git.getRepoPath()+"/backgrounds");
+    backgrounds =  fs.readdirSync(git.getRepoPath()+"/uploads/backgrounds");
   }
   catch(e){} // No big deal if there is no background
   
   for (let k in bgFiles){
-    const fullPath = git.getRepoPath()+"/backgrounds/"+bgFiles[k];
+    const fullPath = git.getRepoPath()+"/uploads/backgrounds/"+bgFiles[k];
     if (fs.lstatSync(fullPath).isDirectory()) continue;
     backgrounds.push(bgFiles[k])
   }

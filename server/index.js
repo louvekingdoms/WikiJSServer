@@ -86,8 +86,8 @@ app.use(mw.security)
 // ----------------------------------------
 // Public Assets
 // ----------------------------------------
-
-app.use(favicon(path.join(ROOTPATH, 'assets', 'favicon.ico')))
+//path.join(ROOTPATH, 'assets', 'favicon.ico')
+app.use(favicon(global.git.getRepoPath()+"/uploads/favicon/favicon.png"))
 app.use(express.static(path.join(ROOTPATH, 'assets'), {
   index: false,
   maxAge: '7d'
@@ -167,7 +167,6 @@ app.use(mw.flash)
 
 app.use('/', ctrl.auth)
 
-app.use('/backgrounds', mw.auth, ctrl.backgrounds)
 app.use('/uploads', mw.auth, ctrl.uploads)
 app.use('/admin', mw.auth, ctrl.admin)
 app.use('/', mw.auth, ctrl.pages)

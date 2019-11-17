@@ -1,13 +1,5 @@
 extends ../layout.pug
 
-mixin tocMenu(ti)
-  each node in ti
-    li
-      a(href='#' + node.anchor, title=node.content)= node.content
-      if node.nodes.length > 0
-        ul
-          +tocMenu(node.nodes)
-          
 block rootNavCenter
   h2.nav-item= pageData.meta.title
 
@@ -24,6 +16,36 @@ block rootNavRight
 block content
   editor(inline-template, current-path=pageData.meta.path, v-cloak)
     .columns.is-gapless
+    
+      // Navigation for desktop
+      .column.is-narrow.sidebar
+        aside
+          .sidebar-label
+            span= t('sidebar.navigation')
+          ul.sidebar-menu
+            li(style='height:8px; border-bottom:1px solid #666666;margin:8px;margin-top:0px;')
+            
+            li
+              a(href='/')
+                i.nc-icon-outline.ui-1_home-minimal
+                span= t('nav.root')
+            li
+              a(href='/all')
+                i.nc-icon-outline.business_hierarchy-55
+                span= t('nav.allpages')
+            if pageData.parent
+              li
+                a(href='/' + pageData.parent.path)
+                  i.icon-reply
+                  span= pageData.parent.title
+                  
+            if pageData.children
+                each child in pageData.children
+                  li
+                    a(href='/' + child.path)
+                      i.icon-arrow-right2(style='padding-left:12px;')
+                      span=child.title
+    
       .column.editor-area
         textarea(ref='editorTextArea', v-pre)= pageData.markdown
       //- .column.editor-sd

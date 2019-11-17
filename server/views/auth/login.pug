@@ -6,15 +6,15 @@ html(data-logic='login')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     meta(name='theme-color', content='#009688')
     meta(name='msapplication-TileColor', content='#009688')
-    meta(name='msapplication-TileImage', content='/favicons/ms-icon-144x144.png')
+    // meta(name='msapplication-TileImage', content='/favicons/ms-icon-144x144.png')
     title= appconfig.title
 
-    // Favicon
-    each favsize in [57, 60, 72, 76, 114, 120, 144, 152, 180]
-      link(rel='apple-touch-icon', sizes=favsize + 'x' + favsize, href='/favicons/apple-icon-' + favsize + 'x' + favsize + '.png')
-    link(rel='icon', type='image/png', sizes='192x192', href='/favicons/android-icon-192x192.png')
-    each favsize in [32, 96, 16]
-      link(rel='icon', type='image/png', sizes=favsize + 'x' + favsize, href='/favicons/favicon-' + favsize + 'x' + favsize + '.png')
+    // Favicon - Disabled for now
+    // each favsize in [57, 60, 72, 76, 114, 120, 144, 152, 180]
+    //   link(rel='apple-touch-icon', sizes=favsize + 'x' + favsize, href='/favicons/apple-icon-' + favsize + 'x' + favsize + '.png')
+    // link(rel='icon', type='image/png', sizes='192x192', href='/favicons/android-icon-192x192.png')
+    // each favsize in [32, 96, 16]
+    //   link(rel='icon', type='image/png', sizes=favsize + 'x' + favsize, href='/favicons/favicon-' + favsize + 'x' + favsize + '.png')
     link(rel='manifest', href='/manifest.json')
 
     // JS / CSS
@@ -24,7 +24,7 @@ html(data-logic='login')
   body
     #bg
       each bg in backgrounds
-        div(style='background-image:url("backgrounds/'+bg+'");')
+        div(style='background-image:url("uploads/backgrounds/'+bg+'");')
     #root
       h1= appconfig.title
       h2= t('auth:loginrequired')
