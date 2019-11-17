@@ -1,5 +1,13 @@
 extends ../layout.pug
 
+mixin tocMenu(ti)
+  each node in ti
+    li
+      a(href='#' + node.anchor, title=node.content)= node.content
+      if node.nodes.length > 0
+        ul
+          +tocMenu(node.nodes)
+          
 block rootNavCenter
   h2.nav-item= pageData.meta.title
 
